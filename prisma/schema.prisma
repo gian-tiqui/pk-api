@@ -14,22 +14,44 @@ datasource db {
 }
 
 model User {
-  id                Int        @id
+  id                Int        @id @default(autoincrement())
   firstName         String
   middleName        String?
   lastName          String
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
   isDeleted         Boolean    @default(false)
+  employeeId        Int        @unique
+  password          String
+  deptId            Int        
+  department        Department @relation(fields: [deptId], references: [id])
   refreshToken      String?    @unique
   logs              Log[]
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+model Department {
+  id               Int        @id @default(autoincrement())
+  name             String     @unique
+  code             String     @unique
+  users            User[]
+  divisionId       Int
+  division         Division   @relation(fields: [divisionId], references: [id])
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+}
+
+model Division {
+  id               Int         @id @default(autoincrement())
+  name             String      @unique
+  code             String      @unique
+  departments      Department[]
 }
 
 model Floor {
-  id                Int        @id
-  name              String     @unique
+  id                Int        @id @default(autoincrement())
+  name              String     
   level             Int        
-  code              String     @unique
+  code              String     
   isDeleted         Boolean    @default(false)
   rooms             Room[]
   createdAt         DateTime   @default(now())
@@ -37,21 +59,53 @@ model Floor {
 }
 
 model Room {
-  id                Int        @id
+  id                Int        @id @default(autoincrement())
   name              String
-  code              String     @unique
+  code              String     
+  detail            String?
   floorId           Int
   floor             Floor      @relation(fields: [floorId], references: [id])
+  images            RoomImages[]
   isDeleted         Boolean    @default(false)
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 }
 
+model RoomImages {
+  id                Int        @id @default(autoincrement())
+  roomId            Int
+  room              Room       @relation(fields: [roomId], references: [id])
+  imageLocation     String     @unique
+  isMainImage       Boolean
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
 model Log {
-  id                Int        @id
+  id                Int        @id @default(autoincrement())
   userId            Int        
   user              User       @relation(fields: [userId], references: [id])
   log               Json
+  typeId            Int
+  type              LogType    @relation(fields: [typeId], references: [id])
+  methodId          Int
+  method            LogMethod  @relation(fields: [methodId], references: [id])
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
+}
+
+model LogMethod {
+  id                Int         @id @default(autoincrement())
+  method            String      @unique
+  logs              Log[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model LogType {
+  id                Int          @id @default(autoincrement())
+  type              String       @unique
+  logs              Log[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 }
