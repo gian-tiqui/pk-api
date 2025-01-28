@@ -55,7 +55,7 @@ export class RoomService {
       });
 
       return {
-        message: 'Floor created successfully',
+        message: 'Room created successfully',
       };
     } catch (error) {
       errorHandler(error, this.logger);
@@ -77,14 +77,14 @@ export class RoomService {
         ...(isDeleted ? { isDeleted } : { isDeleted: false }),
       };
 
-      const include: object = {
-        images: { select: { imageLocation: true, isMainImage: true } },
-      };
-
-      const rooms: Room[] = await this.prismaService.room.findMany({
+      const rooms: (Room & {
+        images: { imageLocation: string; isMainImage: boolean }[];
+      })[] = await this.prismaService.room.findMany({
         where,
         orderBy,
-        include,
+        include: {
+          images: { select: { imageLocation: true, isMainImage: true } },
+        },
         skip: offset || PaginationDefault.OFFSET,
         take: limit || PaginationDefault.LIMIT,
       });
@@ -194,7 +194,7 @@ export class RoomService {
 
   async deleteRoomById(roomId: number, accessToken: string) {
     try {
-      const room = await this.prismaService.floor.findFirst({
+      const room = await this.prismaService.room.findFirst({
         where: { id: roomId, isDeleted: false },
       });
 

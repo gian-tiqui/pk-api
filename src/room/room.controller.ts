@@ -15,13 +15,14 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { RoomService } from './room.service';
-import { CreateRoomDto, UpdateRoomDto } from './dto/update-room.dto';
+import { UpdateRoomDto } from './dto/update-room.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Messages } from 'src/utils/enums/enum';
 import errorHandler from 'src/utils/functions/errorHandler';
 import extractAccessToken from 'src/utils/functions/extractAccessToken';
 import { Create, FindMany } from 'src/utils/types/types';
 import { FindAllDto } from 'src/utils/common/find-all.dto';
+import { CreateRoomDto } from './dto/create-room.dto';
 
 @Controller('room')
 export class RoomController {
@@ -91,7 +92,7 @@ export class RoomController {
     }
   }
 
-  @Delete(':roomId')
+  @Delete(':roomId/soft-delete')
   softRemove(
     @Param('roomId', ParseIntPipe) roomId: number,
     @Req() req: Request,
