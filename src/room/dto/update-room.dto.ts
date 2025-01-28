@@ -1,7 +1,6 @@
-export class UpdateRoomDto {}
 import { IsInt, IsOptional, IsString } from 'class-validator';
 
-export class CreateRoomDto {
+export class UpdateRoomDto {
   @IsString()
   @IsOptional()
   name: string;
