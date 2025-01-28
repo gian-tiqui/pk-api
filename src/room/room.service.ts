@@ -238,11 +238,11 @@ export class RoomService {
    * 2. The format of the selectedImageIds should be like (1,2,3,4)
    * 3. After splitting the string, remove the data in the RoomImages table with the selected ids.
    *
-   * @param roomId: number
-   * @param selectedImageIds: string
-   * @param files: Express.Multer.File[]
-   * @param accessToken: string
-   * @method deleteSelectedImages: Promise<UpdateById>
+   * @param roomId: @type number
+   * @param selectedImageIds: @type string
+   * @param files: @type Express.Multer.File[]
+   * @param accessToken: @type string
+   * @method deleteSelectedImages: @type Promise<UpdateById>
    */
 
   async deleteSelectedRoomImages(
