@@ -20,6 +20,14 @@ import errorHandler from 'src/utils/functions/errorHandler';
 // import { JwtAuthGuard } from 'src/auth/guards/auth.guard';
 import { FindAllDto } from 'src/utils/common/find-all.dto';
 import extractAccessToken from 'src/utils/functions/extractAccessToken';
+import {
+  Create,
+  FindMany,
+  FindOne,
+  RemoveById,
+  UpdateById,
+} from 'src/utils/types/types';
+import { RateLimit } from 'nestjs-rate-limiter';
 
 // @UseGuards(JwtAuthGuard)
 @Controller('floor')
@@ -29,7 +37,16 @@ export class FloorController {
   constructor(private readonly floorService: FloorService) {}
 
   @Post()
-  create(@Body() createFloorDto: CreateFloorDto, @Req() req: Request) {
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before creating a new room.',
+    keyPrefix: 'create-floor',
+    points: 10,
+  })
+  create(
+    @Body() createFloorDto: CreateFloorDto,
+    @Req() req: Request,
+  ): Promise<Create> {
     try {
       const accessToken = extractAccessToken(req);
 
@@ -42,37 +59,67 @@ export class FloorController {
   }
 
   @Get()
-  findAll(@Query() query: FindAllDto) {
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before loading all floors.',
+    keyPrefix: 'get-floors',
+    points: 10,
+  })
+  findAll(@Query() query: FindAllDto): Promise<FindMany> {
     return this.floorService.findFloors(query);
   }
 
   @Get(':floorId')
-  findOne(@Param('floorId', ParseIntPipe) floorId: number) {
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before loading a floor.',
+    keyPrefix: 'get-floor-by-id',
+    points: 10,
+  })
+  findOne(@Param('floorId', ParseIntPipe) floorId: number): Promise<FindOne> {
     return this.floorService.findFloorById(floorId);
   }
 
   @Get(':floorId/room')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before loading the rooms of a floor.',
+    keyPrefix: 'get-floor-rooms-by-floor-id',
+    points: 10,
+  })
   findFloorRooms(
     @Param('floorId', ParseIntPipe) floorId: number,
     @Query() query: FindAllDto,
-  ) {
+  ): Promise<FindMany> {
     return this.floorService.findFloorRooms(floorId, query);
   }
 
   @Get(':floorId/room/:roomId')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before loading the room of a floor.',
+    keyPrefix: 'get-floor-room-by-floor-id-and-room-id',
+    points: 10,
+  })
   findFloorRoom(
     @Param('floorId', ParseIntPipe) floorId: number,
     @Param('roomId', ParseIntPipe) roomId: number,
-  ) {
+  ): Promise<FindOne> {
     return this.floorService.findFloorRoomByIds(floorId, roomId);
   }
 
   @Patch(':floorId')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before updating a floor.',
+    keyPrefix: 'update-floor-by-id',
+    points: 10,
+  })
   update(
     @Param('floorId', ParseIntPipe) floorId: number,
     @Body() updateFloorDto: UpdateFloorDto,
     @Req() req: Request,
-  ) {
+  ): Promise<UpdateById> {
     try {
       const accessToken = extractAccessToken(req);
 
@@ -89,10 +136,16 @@ export class FloorController {
   }
 
   @Delete(':floorId/soft-delete')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before soft deleting a floor.',
+    keyPrefix: 'soft-delete-floor-by-id',
+    points: 10,
+  })
   softRemove(
     @Param('floorId', ParseIntPipe) floorId: number,
     @Req() req: Request,
-  ) {
+  ): Promise<RemoveById> {
     try {
       const accessToken = extractAccessToken(req);
 
@@ -105,7 +158,16 @@ export class FloorController {
   }
 
   @Delete(':floorId')
-  remove(@Param('floorId', ParseIntPipe) floorId: number, @Req() req: Request) {
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before deleting a floor.',
+    keyPrefix: 'delete-floor-by-id',
+    points: 10,
+  })
+  remove(
+    @Param('floorId', ParseIntPipe) floorId: number,
+    @Req() req: Request,
+  ): Promise<RemoveById> {
     try {
       const accessToken = extractAccessToken(req);
 
@@ -118,7 +180,16 @@ export class FloorController {
   }
 
   @Patch(':floorId/retrieve')
-  retrieve(@Param('floorId', ParseIntPipe) floorId, @Req() req: Request) {
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before retrieving a floor by id.',
+    keyPrefix: 'retrieve-floor-by-id',
+    points: 10,
+  })
+  retrieve(
+    @Param('floorId', ParseIntPipe) floorId,
+    @Req() req: Request,
+  ): Promise<RemoveById> {
     try {
       const accessToken = extractAccessToken(req);
 

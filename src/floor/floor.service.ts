@@ -11,6 +11,14 @@ import getPreviousValues from 'src/utils/functions/getPreviousValues';
 import notFound from 'src/utils/functions/notFound';
 import { Floor } from '@prisma/client';
 import dataExists from 'src/utils/functions/dataExist';
+import {
+  Create,
+  FindMany,
+  FindOne,
+  RemoveById,
+  RetrieveById,
+  UpdateById,
+} from 'src/utils/types/types';
 
 @Injectable()
 export class FloorService {
@@ -21,25 +29,28 @@ export class FloorService {
     private jwtService: JwtService,
   ) {}
 
-  async createFloor(createFloorDto: CreateFloorDto, accessToken: string) {
+  async createFloor(
+    createFloorDto: CreateFloorDto,
+    accessToken: string,
+  ): Promise<Create> {
     try {
       const userId: number = extractUserId(accessToken, this.jwtService);
 
-      const user = await this.prismaService.user.findFirst({
-        where: { id: userId },
-      });
+      const [user, floor] = await Promise.all([
+        this.prismaService.user.findFirst({
+          where: { id: userId },
+        }),
+        this.prismaService.floor.findFirst({
+          where: {
+            name: { equals: createFloorDto.name, mode: 'insensitive' },
+            code: { equals: createFloorDto.code, mode: 'insensitive' },
+            level: createFloorDto.level,
+            isDeleted: false,
+          },
+        }),
+      ]);
 
       if (!user) notFound(`User`, userId);
-
-      const floor = await this.prismaService.floor.findFirst({
-        where: {
-          name: { equals: createFloorDto.name, mode: 'insensitive' },
-          code: { equals: createFloorDto.code, mode: 'insensitive' },
-          level: createFloorDto.level,
-          isDeleted: false,
-        },
-      });
-
       if (floor) dataExists(`Floor`);
 
       const newFloor = await this.prismaService.floor.create({
@@ -63,7 +74,7 @@ export class FloorService {
     }
   }
 
-  async findFloors(query: FindAllDto) {
+  async findFloors(query: FindAllDto): Promise<FindMany> {
     const { offset, limit, search, level, sortBy, sortOrder, isDeleted } =
       query;
     const orderBy = sortBy ? { [sortBy]: sortOrder || 'asc' } : undefined;
@@ -101,7 +112,7 @@ export class FloorService {
     }
   }
 
-  async findFloorById(floorId: number) {
+  async findFloorById(floorId: number): Promise<FindOne> {
     try {
       const floor = await this.prismaService.floor.findFirst({
         where: { id: floorId },
@@ -110,7 +121,7 @@ export class FloorService {
       if (!floor) notFound('Floor', floorId);
 
       return {
-        messaage: `Room with the id ${floorId} found.`,
+        message: `Room with the id ${floorId} found.`,
         floor,
       };
     } catch (error) {
@@ -118,7 +129,7 @@ export class FloorService {
     }
   }
 
-  async findFloorRooms(floorId: number, query: FindAllDto) {
+  async findFloorRooms(floorId: number, query: FindAllDto): Promise<FindMany> {
     try {
       const floor = await this.prismaService.floor.findFirst({
         where: { id: floorId },
@@ -157,7 +168,7 @@ export class FloorService {
     }
   }
 
-  async findFloorRoomByIds(floorId: number, roomId: number) {
+  async findFloorRoomByIds(floorId: number, roomId: number): Promise<FindOne> {
     try {
       const room = await this.prismaService.room.findFirst({
         where: { id: roomId, floorId: floorId },
@@ -178,7 +189,7 @@ export class FloorService {
     floorId: number,
     updateFloorDto: UpdateFloorDto,
     accessToken: string,
-  ) {
+  ): Promise<UpdateById> {
     try {
       const floor = await this.prismaService.floor.findFirst({
         where: { id: floorId },
@@ -210,7 +221,10 @@ export class FloorService {
     }
   }
 
-  async softDeleteFloorById(floorId: number, accessToken: string) {
+  async softDeleteFloorById(
+    floorId: number,
+    accessToken: string,
+  ): Promise<RemoveById> {
     try {
       const floor = await this.prismaService.floor.findFirst({
         where: { id: floorId },
@@ -235,14 +249,17 @@ export class FloorService {
       });
 
       return {
-        message: 'Floor moved to trash.',
+        message: `Floor with the id ${floorId} moved to trash.`,
       };
     } catch (error) {
       errorHandler(error, this.logger);
     }
   }
 
-  async deleteFloorById(floorId: number, accessToken: string) {
+  async deleteFloorById(
+    floorId: number,
+    accessToken: string,
+  ): Promise<RemoveById> {
     try {
       const floor = await this.prismaService.floor.findFirst({
         where: { id: floorId, isDeleted: false },
@@ -264,14 +281,17 @@ export class FloorService {
       });
 
       return {
-        message: 'Floor deleted successfully.',
+        message: `Floor with the id ${floorId} deleted successfully.`,
       };
     } catch (error) {
       errorHandler(error, this.logger);
     }
   }
 
-  async retrieveFloorById(floorId: number, accessToken: string) {
+  async retrieveFloorById(
+    floorId: number,
+    accessToken: string,
+  ): Promise<RetrieveById> {
     try {
       const floor = await this.prismaService.floor.findFirst({
         where: { id: floorId, isDeleted: true },

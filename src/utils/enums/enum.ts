@@ -1,5 +1,6 @@
 enum Messages {
   INTERNAL_SERVER = 'There was a problem in the server.',
+  IMAGES_ERROR = 'Only image files are allowed.',
 }
 
 enum LogMethod {
