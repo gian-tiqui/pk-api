@@ -22,4 +22,9 @@ enum PaginationDefault {
   LIMIT = 10,
 }
 
-export { Messages, LogMethod, LogType, PaginationDefault };
+enum Directory {
+  UPLOAD = 'uploads',
+  ROOM_IMAGES = 'room_images',
+}
+
+export { Messages, LogMethod, LogType, PaginationDefault, Directory };
