@@ -1,35 +1,31 @@
-import { User } from '@prisma/client';
-
-type CreateBase = {
+type Create = {
   message: string;
 };
 
-type UpdateBase = {
-  message: string;
-};
-
-type RemoveBase = {
-  message: string;
-};
-
-type CreateUser = CreateBase;
-
-type FindUsers = {
+type FindMany = {
   message: string;
   count: number;
-  users: User[];
+  [key: string]: any;
 };
 
-type FindUser = {
+type FindOne = {
   message: string;
-  user: User;
+  [key: string]: any;
 };
 
-type UpdateUser = UpdateBase;
+type UpdateById = {
+  message: string;
+};
 
-type RemoveUser = RemoveBase;
+type RemoveById = {
+  message: string;
+};
 
-type Register = CreateBase;
+type RetrieveById = {
+  message: string;
+};
+
+type Register = Create;
 
 type Login = {
   message: string;
@@ -50,15 +46,16 @@ type SignToken = Promise<string>;
 type SignRefreshToken = Promise<string>;
 
 export type {
-  CreateUser,
-  FindUsers,
-  FindUser,
-  UpdateUser,
-  RemoveUser,
   Register,
   Login,
   Refresh,
   Logout,
   SignToken,
   SignRefreshToken,
+  Create,
+  FindMany,
+  FindOne,
+  UpdateById,
+  RemoveById,
+  RetrieveById,
 };
