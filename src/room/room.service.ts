@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -9,15 +9,24 @@ import { promisify } from 'util';
 import { JwtService } from '@nestjs/jwt';
 import extractUserId from 'src/utils/functions/extractUserId';
 import notFound from 'src/utils/functions/notFound';
-import { LogType, LogMethod, PaginationDefault } from 'src/utils/enums/enum';
+import {
+  LogType,
+  LogMethod,
+  PaginationDefault,
+  Directory,
+} from 'src/utils/enums/enum';
 import { Create, FindMany, FindOne } from 'src/utils/types/types';
 import { FindAllDto } from 'src/utils/common/find-all.dto';
-import { Room } from '@prisma/client';
+import { Prisma, Room } from '@prisma/client';
 import getPreviousValues from 'src/utils/functions/getPreviousValues';
+import dataExists from 'src/utils/functions/dataExist';
+import generateUniqueSuffix from 'src/utils/functions/generateUniqueSuffix';
 
 @Injectable()
 export class RoomService {
   private logger: Logger = new Logger('RoomService');
+  private unlinkAsync = promisify(unlink);
+  private renameAsync = promisify(rename);
 
   constructor(
     private readonly prismaService: PrismaService,
@@ -31,15 +40,23 @@ export class RoomService {
     try {
       const id = extractUserId(accessToken, this.jwtService);
 
-      const [user, floor] = await Promise.all([
+      const [user, floor, room] = await Promise.all([
         this.prismaService.user.findFirst({ where: { id } }),
         this.prismaService.floor.findFirst({
           where: { id: createRoomDto.floorId },
+        }),
+        this.prismaService.room.findFirst({
+          where: {
+            name: { equals: createRoomDto.name, mode: 'insensitive' },
+            code: { equals: createRoomDto.code, mode: 'insensitive' },
+            isDeleted: false,
+          },
         }),
       ]);
 
       if (!user) notFound('User', id);
       if (!floor) notFound(`Floor`, createRoomDto.floorId);
+      if (room) dataExists('Room');
 
       const newRoom = await this.prismaService.room.create({
         data: createRoomDto,
@@ -67,7 +84,7 @@ export class RoomService {
     const orderBy = sortBy ? { [sortBy]: sortOrder || 'asc' } : undefined;
 
     try {
-      const where: object = {
+      const where: Prisma.RoomWhereInput = {
         ...(search && {
           OR: [
             { name: { contains: search, mode: 'insensitive' } },
@@ -126,7 +143,6 @@ export class RoomService {
   async updateRoomById(
     roomId: number,
     updateRoomDto: UpdateRoomDto,
-    files: Express.Multer.File[],
     accessToken: string,
   ) {
     try {
@@ -155,6 +171,100 @@ export class RoomService {
       return {
         message: `Room with the id ${roomId} updated successfully.`,
       };
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
+
+  async uploadRoomPhotosById(
+    roomId: number,
+    files: Express.Multer.File[],
+    accessToken: string,
+  ) {
+    try {
+      const id = extractUserId(accessToken, this.jwtService);
+
+      const [user, room] = await Promise.all([
+        this.prismaService.user.findFirst({ where: { id } }),
+        this.prismaService.room.findFirst({
+          where: { id: roomId },
+        }),
+      ]);
+
+      if (!user) notFound('User', id);
+      if (!room) notFound('Room', roomId);
+      if (!files || files.length < 1)
+        throw new BadRequestException(`Upload must contain at least one image`);
+
+      const dir = path.join(
+        __dirname,
+        '..',
+        '..',
+        '..',
+        Directory.UPLOAD,
+        Directory.ROOM_IMAGES,
+      );
+
+      await fs.mkdir(dir, { recursive: true });
+
+      for (const [index, file] of files.entries()) {
+        const fileName = generateUniqueSuffix(roomId, file.originalname);
+
+        const filePath = path.join(dir, fileName);
+
+        await fs.writeFile(filePath, file.buffer);
+
+        await this.prismaService.roomImages.create({
+          data: {
+            imageLocation: fileName,
+            isMainImage: index === 0,
+            roomId,
+          },
+        });
+      }
+
+      return {
+        message: `Images uploaded to the room with the id ${roomId} successfully.`,
+      };
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
+
+  /**
+   * @TODO
+   *
+   * 1. Create a method that will take selectedImageIds as string
+   * 2. The format of the selectedImageIds should be like (1,2,3,4)
+   * 3. After splitting the string, remove the data in the RoomImages table with the selected ids.
+   *
+   * @param roomId: number
+   * @param selectedImageIds: string
+   * @param files: Express.Multer.File[]
+   * @param accessToken: string
+   * @method deleteSelectedImages: Promise<UpdateById>
+   */
+
+  async deleteSelectedRoomImages(
+    roomId: number,
+    selectedImageIds: string,
+    accessToken: string,
+  ) {
+    try {
+      if (!selectedImageIds || selectedImageIds == '')
+        throw new BadRequestException(`Selected images ids are missing.`);
+
+      const id = extractUserId(accessToken, this.jwtService);
+
+      const [user, room] = await Promise.all([
+        this.prismaService.user.findFirst({ where: { id } }),
+        this.prismaService.room.findFirst({ where: { id: roomId } }),
+      ]);
+
+      if (!user) notFound('User', id);
+      if (!room) notFound('Room', roomId);
+
+      console.log(selectedImageIds);
     } catch (error) {
       errorHandler(error, this.logger);
     }

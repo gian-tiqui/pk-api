@@ -56,9 +56,9 @@ export class RoomController {
     return this.roomService.findRoomById(roomId);
   }
 
-  @Patch(':roomId')
+  @Patch(':roomId/upload')
   @UseInterceptors(
-    FilesInterceptor('roomImages', 20, {
+    FilesInterceptor('files', 20, {
       limits: { fileSize: 1024 * 1024 * 10 },
       fileFilter: (req, file, cb) => {
         const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
@@ -70,10 +70,47 @@ export class RoomController {
       },
     }),
   )
+  upload(
+    @Param('roomId', ParseIntPipe) roomId: number,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Req() req: Request,
+  ) {
+    try {
+      const accessToken = extractAccessToken(req);
+
+      if (!accessToken) throw new BadRequestException(`Token is missing`);
+
+      return this.roomService.uploadRoomPhotosById(roomId, files, accessToken);
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
+
+  @Delete(':roomId/delete-images')
+  unbindRoomSelectedImages(
+    @Param('roomId', ParseIntPipe) roomId: number,
+    @Query('imageIds') imageIds: string,
+    @Req() req: Request,
+  ) {
+    try {
+      const accessToken = extractAccessToken(req);
+
+      if (!accessToken) throw new BadRequestException(`Token is missing`);
+
+      return this.roomService.deleteSelectedRoomImages(
+        roomId,
+        imageIds,
+        accessToken,
+      );
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
+
+  @Patch(':roomId')
   update(
     @Param('roomId', ParseIntPipe) roomId: number,
     @Body() updateRoomDto: UpdateRoomDto,
-    @UploadedFiles() files: Express.Multer.File[],
     @Req() req: Request,
   ) {
     try {
@@ -84,7 +121,6 @@ export class RoomController {
       return this.roomService.updateRoomById(
         roomId,
         updateRoomDto,
-        files,
         accessToken,
       );
     } catch (error) {

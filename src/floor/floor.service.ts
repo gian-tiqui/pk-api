@@ -9,7 +9,7 @@ import { FindAllDto } from 'src/utils/common/find-all.dto';
 import extractUserId from 'src/utils/functions/extractUserId';
 import getPreviousValues from 'src/utils/functions/getPreviousValues';
 import notFound from 'src/utils/functions/notFound';
-import { Floor } from '@prisma/client';
+import { Floor, Prisma } from '@prisma/client';
 import dataExists from 'src/utils/functions/dataExist';
 import {
   Create,
@@ -80,7 +80,7 @@ export class FloorService {
     const orderBy = sortBy ? { [sortBy]: sortOrder || 'asc' } : undefined;
 
     try {
-      const where: object = {
+      const where: Prisma.FloorWhereInput = {
         ...(search && {
           OR: [
             { name: { contains: search, mode: 'insensitive' } },
@@ -140,7 +140,7 @@ export class FloorService {
       const { offset, limit, search, sortBy, sortOrder } = query;
       const orderBy = sortBy ? { [sortBy]: sortOrder || 'asc' } : undefined;
 
-      const where: object = {
+      const where: Prisma.RoomWhereInput = {
         ...(search && {
           OR: [
             { name: { contains: search, mode: 'insensitive' } },
