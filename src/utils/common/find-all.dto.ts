@@ -1,5 +1,13 @@
-import { IsOptional, IsString, IsInt, Min, IsNumber } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsInt,
+  Min,
+  IsNumber,
+  IsBoolean,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
+import { BadRequestException } from '@nestjs/common';
 
 export class FindAllDto {
   @IsOptional()
@@ -49,4 +57,14 @@ export class FindAllDto {
   @IsOptional()
   @IsString()
   sortOrder?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => {
+    if (value !== 'true' && value !== 'false') {
+      throw new BadRequestException(`isDeleted must be a boolean value.`);
+    }
+    return value === 'true';
+  })
+  isDeleted: boolean;
 }

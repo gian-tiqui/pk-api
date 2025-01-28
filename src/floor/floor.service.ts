@@ -6,9 +6,11 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { LogMethod, LogType, PaginationDefault } from 'src/utils/enums/enum';
 import { FindAllDto } from 'src/utils/common/find-all.dto';
-import extractUserId from 'src/utils/common/extractUserId';
+import extractUserId from 'src/utils/functions/extractUserId';
 import getPreviousValues from 'src/utils/functions/getPreviousValues';
 import notFound from 'src/utils/functions/notFound';
+import { Floor } from '@prisma/client';
+import dataExists from 'src/utils/functions/dataExist';
 
 @Injectable()
 export class FloorService {
@@ -28,6 +30,17 @@ export class FloorService {
       });
 
       if (!user) notFound(`User`, userId);
+
+      const floor = await this.prismaService.floor.findFirst({
+        where: {
+          name: { equals: createFloorDto.name, mode: 'insensitive' },
+          code: { equals: createFloorDto.code, mode: 'insensitive' },
+          level: createFloorDto.level,
+          isDeleted: false,
+        },
+      });
+
+      if (floor) dataExists(`Floor`);
 
       const newFloor = await this.prismaService.floor.create({
         data: createFloorDto,
@@ -51,7 +64,8 @@ export class FloorService {
   }
 
   async findFloors(query: FindAllDto) {
-    const { offset, limit, search, level, sortBy, sortOrder } = query;
+    const { offset, limit, search, level, sortBy, sortOrder, isDeleted } =
+      query;
     const orderBy = sortBy ? { [sortBy]: sortOrder || 'asc' } : undefined;
 
     try {
@@ -63,17 +77,17 @@ export class FloorService {
           ],
         }),
         ...(level && { level }),
-        isDeleted: false,
+        ...(isDeleted ? { isDeleted } : { isDeleted: false }),
       };
 
-      const floors = await this.prismaService.floor.findMany({
+      const floors: Floor[] = await this.prismaService.floor.findMany({
         where,
         orderBy,
         skip: offset || PaginationDefault.OFFSET,
         take: limit || PaginationDefault.LIMIT,
       });
 
-      const count = await this.prismaService.floor.findMany({
+      const count: number = await this.prismaService.floor.count({
         where,
       });
 
@@ -143,7 +157,7 @@ export class FloorService {
     }
   }
 
-  async findFloorRoomById(floorId: number, roomId: number) {
+  async findFloorRoomByIds(floorId: number, roomId: number) {
     try {
       const room = await this.prismaService.room.findFirst({
         where: { id: roomId, floorId: floorId },
@@ -231,7 +245,7 @@ export class FloorService {
   async deleteFloorById(floorId: number, accessToken: string) {
     try {
       const floor = await this.prismaService.floor.findFirst({
-        where: { id: floorId },
+        where: { id: floorId, isDeleted: false },
       });
 
       if (!floor) notFound('Floor', floorId);
@@ -268,7 +282,7 @@ export class FloorService {
       await this.prismaService.floor.update({
         where: { id: floorId },
         data: {
-          isDeleted: true,
+          isDeleted: false,
         },
       });
 

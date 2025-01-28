@@ -9,7 +9,7 @@ import {
   Req,
   Logger,
   BadRequestException,
-  UseGuards,
+  // UseGuards,
   Query,
   ParseIntPipe,
 } from '@nestjs/common';
@@ -17,11 +17,11 @@ import { FloorService } from './floor.service';
 import { CreateFloorDto } from './dto/create-floor.dto';
 import { UpdateFloorDto } from './dto/update-floor.dto';
 import errorHandler from 'src/utils/functions/errorHandler';
-import { JwtAuthGuard } from 'src/auth/guards/auth.guard';
+// import { JwtAuthGuard } from 'src/auth/guards/auth.guard';
 import { FindAllDto } from 'src/utils/common/find-all.dto';
 import extractAccessToken from 'src/utils/functions/extractAccessToken';
 
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @Controller('floor')
 export class FloorController {
   private logger: Logger = new Logger('FloorController');
@@ -51,20 +51,20 @@ export class FloorController {
     return this.floorService.findFloorById(floorId);
   }
 
-  @Get(':floorId')
+  @Get(':floorId/room')
   findFloorRooms(
     @Param('floorId', ParseIntPipe) floorId: number,
     @Query() query: FindAllDto,
   ) {
-    return this.findFloorRooms(floorId, query);
+    return this.floorService.findFloorRooms(floorId, query);
   }
 
-  @Get(':floorId')
+  @Get(':floorId/room/:roomId')
   findFloorRoom(
     @Param('floorId', ParseIntPipe) floorId: number,
     @Param('roomId', ParseIntPipe) roomId: number,
   ) {
-    return this.findFloorRoom(floorId, roomId);
+    return this.floorService.findFloorRoomByIds(floorId, roomId);
   }
 
   @Patch(':floorId')
@@ -88,7 +88,7 @@ export class FloorController {
     }
   }
 
-  @Delete(':floorId')
+  @Delete(':floorId/soft-delete')
   softRemove(
     @Param('floorId', ParseIntPipe) floorId: number,
     @Req() req: Request,
@@ -117,7 +117,7 @@ export class FloorController {
     }
   }
 
-  @Patch('floorId')
+  @Patch(':floorId/retrieve')
   retrieve(@Param('floorId', ParseIntPipe) floorId, @Req() req: Request) {
     try {
       const accessToken = extractAccessToken(req);
