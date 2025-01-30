@@ -52,8 +52,11 @@ export class RoomController {
   }
 
   @Get(':roomId')
-  findOne(@Param('roomId', ParseIntPipe) roomId: number) {
-    return this.roomService.findRoomById(roomId);
+  findOne(
+    @Param('roomId', ParseIntPipe) roomId: number,
+    @Query() query: FindAllDto,
+  ) {
+    return this.roomService.findRoomById(roomId, query);
   }
 
   @Patch(':roomId/upload')

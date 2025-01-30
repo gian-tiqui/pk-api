@@ -15,6 +15,7 @@ enum LogType {
   FLOOR = 1,
   ROOM = 2,
   USER = 3,
+  ROOM_IMAGES = 4,
 }
 
 enum PaginationDefault {

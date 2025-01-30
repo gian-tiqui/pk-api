@@ -67,4 +67,14 @@ export class FindAllDto {
     return value === 'true';
   })
   isDeleted: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => {
+    if (value !== 'true' && value !== 'false') {
+      throw new BadRequestException(`isDeleted must be a boolean value.`);
+    }
+    return value === 'true';
+  })
+  roomImageDeleted: boolean;
 }
