@@ -19,7 +19,7 @@ model User {
   middleName        String?
   lastName          String
   isDeleted         Boolean    @default(false)
-  employeeId        Int        @unique
+  employeeId        String        @unique
   password          String
   deptId            Int        
   department        Department @relation(fields: [deptId], references: [id])
