@@ -4,7 +4,7 @@ import * as argon from 'argon2';
 const prismaClient = new PrismaClient();
 
 const seedEditTypes = async () => {
-  const logTypes: string[] = ['FLOOR', 'ROOM', 'USER'];
+  const logTypes: string[] = ['FLOOR', 'ROOM', 'USER', 'ROOM_IMAGES'];
 
   for (const logType of logTypes) {
     await prismaClient.logType.upsert({
@@ -129,7 +129,7 @@ const seedUsers = async () => {
     {
       firstName: 'Niel',
       lastName: 'Marketing',
-      employeeId: 1001,
+      employeeId: '00001111',
       deptId: 3,
     },
   ];

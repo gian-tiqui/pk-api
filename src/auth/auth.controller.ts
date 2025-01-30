@@ -1,4 +1,11 @@
-import { Body, Controller, ParseIntPipe, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -49,7 +56,7 @@ export class AuthController {
     duration: 60,
     errorMessage: 'Please wait before logging out again.',
   })
-  @Post('logout')
+  @Patch('logout')
   logout(@Query('userId', ParseIntPipe) userId: number): Promise<Logout> {
     return this.authService.logout(userId);
   }

@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -21,6 +26,7 @@ import { Prisma, Room } from '@prisma/client';
 import getPreviousValues from 'src/utils/functions/getPreviousValues';
 import dataExists from 'src/utils/functions/dataExist';
 import generateUniqueSuffix from 'src/utils/functions/generateUniqueSuffix';
+import convertImagesIdsToIntArray from 'src/utils/functions/convertImageIdsToArray';
 
 @Injectable()
 export class RoomService {
@@ -80,7 +86,15 @@ export class RoomService {
   }
 
   async findRooms(query: FindAllDto): Promise<FindMany> {
-    const { offset, limit, search, sortBy, sortOrder, isDeleted } = query;
+    const {
+      offset,
+      limit,
+      search,
+      sortBy,
+      sortOrder,
+      isDeleted,
+      roomImageDeleted,
+    } = query;
     const orderBy = sortBy ? { [sortBy]: sortOrder || 'asc' } : undefined;
 
     try {
@@ -100,7 +114,10 @@ export class RoomService {
         where,
         orderBy,
         include: {
-          images: { select: { imageLocation: true, isMainImage: true } },
+          images: {
+            where: { isDeleted: roomImageDeleted ? roomImageDeleted : false },
+            select: { id: true, imageLocation: true, isMainImage: true },
+          },
         },
         skip: offset || PaginationDefault.OFFSET,
         take: limit || PaginationDefault.LIMIT,
@@ -120,12 +137,17 @@ export class RoomService {
     }
   }
 
-  async findRoomById(roomId: number): Promise<FindOne> {
+  async findRoomById(roomId: number, query: FindAllDto): Promise<FindOne> {
+    const { roomImageDeleted } = query;
     try {
       const room = await this.prismaService.room.findFirst({
         where: { id: roomId },
         include: {
-          images: { select: { imageLocation: true, isMainImage: true } },
+          images: {
+            where: { isDeleted: roomImageDeleted ? roomImageDeleted : false },
+
+            select: { id: true, imageLocation: true, isMainImage: true },
+          },
         },
       });
 
@@ -207,6 +229,8 @@ export class RoomService {
 
       await fs.mkdir(dir, { recursive: true });
 
+      const imageLocations: string[] = [];
+
       for (const [index, file] of files.entries()) {
         const fileName = generateUniqueSuffix(roomId, file.originalname);
 
@@ -221,7 +245,18 @@ export class RoomService {
             roomId,
           },
         });
+
+        imageLocations.push(fileName);
       }
+
+      await this.prismaService.log.create({
+        data: {
+          log: { imageLocations },
+          userId: id,
+          typeId: LogType.ROOM,
+          methodId: LogMethod.CREATE,
+        },
+      });
 
       return {
         message: `Images uploaded to the room with the id ${roomId} successfully.`,
@@ -230,20 +265,6 @@ export class RoomService {
       errorHandler(error, this.logger);
     }
   }
-
-  /**
-   * @TODO
-   *
-   * 1. Create a method that will take selectedImageIds as string
-   * 2. The format of the selectedImageIds should be like (1,2,3,4)
-   * 3. After splitting the string, remove the data in the RoomImages table with the selected ids.
-   *
-   * @param roomId: @type number
-   * @param selectedImageIds: @type string
-   * @param files: @type Express.Multer.File[]
-   * @param accessToken: @type string
-   * @method deleteSelectedImages: @type Promise<UpdateById>
-   */
 
   async deleteSelectedRoomImages(
     roomId: number,
@@ -264,7 +285,41 @@ export class RoomService {
       if (!user) notFound('User', id);
       if (!room) notFound('Room', roomId);
 
-      console.log(selectedImageIds);
+      const imageIds = convertImagesIdsToIntArray(selectedImageIds);
+
+      await Promise.all(
+        imageIds.map(async (id: number) => {
+          const where: Prisma.RoomImagesWhereUniqueInput = { id, roomId };
+
+          const roomImage = await this.prismaService.roomImages.findFirst({
+            where,
+          });
+
+          if (!roomImage) {
+            throw new NotFoundException(
+              `Image not found in the room with the id ${roomId}`,
+            );
+          }
+
+          return this.prismaService.roomImages.update({
+            where,
+            data: { isDeleted: true },
+          });
+        }),
+      );
+
+      await this.prismaService.log.create({
+        data: {
+          log: { deleteRoomIds: imageIds },
+          methodId: LogMethod.SOFT_DELETE,
+          typeId: LogType.ROOM_IMAGES,
+          userId: id,
+        },
+      });
+
+      return {
+        message: `Room Images with the ids ${selectedImageIds} deleted of room with the id ${roomId}.`,
+      };
     } catch (error) {
       errorHandler(error, this.logger);
     }

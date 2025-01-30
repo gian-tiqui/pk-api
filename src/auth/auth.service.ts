@@ -61,9 +61,13 @@ export class AuthService {
     try {
       const user = await this.prismaService.user.findUnique({
         where: { employeeId },
+        include: { department: true },
       });
 
-      if (!user) throw new NotFoundException(`Email not found.`);
+      if (!user)
+        throw new NotFoundException(
+          `User with the employee id ${employeeId} not found.`,
+        );
 
       const passwordMatch = await argon.verify(user.password, password);
 
@@ -74,6 +78,9 @@ export class AuthService {
         user.id,
         user.firstName,
         user.lastName,
+        user.department.id,
+        user.department.name,
+        user.department.code,
       );
 
       let refreshToken;
@@ -110,6 +117,7 @@ export class AuthService {
 
       const user = await this.prismaService.user.findFirst({
         where: { refreshToken },
+        include: { department: true },
       });
 
       if (!user) throw new NotFoundException(`Refresh token not found`);
@@ -118,6 +126,9 @@ export class AuthService {
         user.id,
         user.firstName,
         user.lastName,
+        user.department.id,
+        user.department.name,
+        user.department.code,
       );
 
       return {
@@ -151,11 +162,17 @@ export class AuthService {
     userId: number,
     firstName: string,
     lastName: string,
+    deptId: number,
+    deptName: string,
+    deptCode: string,
   ): SignToken {
     return this.jwtService.signAsync({
       sub: userId,
       firstName,
       lastName,
+      deptId,
+      deptName,
+      deptCode,
     });
   }
 

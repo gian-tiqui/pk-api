@@ -5,6 +5,8 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaService } from './prisma/prisma.service';
 import { ConfigModule } from '@nestjs/config';
 import { RoomModule } from './room/room.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -12,6 +14,11 @@ import { RoomModule } from './room/room.module';
     UserModule,
     AuthModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    ServeStaticModule.forRoot({
+      // URL Structure: http://localhost:8083/uploads/room_images/2-1738052403796-328735966-download.jpg
+      rootPath: join(__dirname, '..', '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
     RoomModule,
   ],
   providers: [PrismaService],

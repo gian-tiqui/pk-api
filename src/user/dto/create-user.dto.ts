@@ -17,9 +17,9 @@ export class CreateUserDto {
   @IsNotEmpty()
   password: string;
 
-  @IsInt()
+  @IsString()
   @IsNotEmpty()
-  employeeId: number;
+  employeeId: string;
 
   @IsInt()
   @IsNotEmpty()
