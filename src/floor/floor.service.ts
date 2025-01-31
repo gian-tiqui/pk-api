@@ -121,7 +121,7 @@ export class FloorService {
       if (!floor) notFound('Floor', floorId);
 
       return {
-        message: `Room with the id ${floorId} found.`,
+        message: `Floor with the id ${floorId} found.`,
         floor,
       };
     } catch (error) {
@@ -191,18 +191,22 @@ export class FloorService {
     accessToken: string,
   ): Promise<UpdateById> {
     try {
-      const floor = await this.prismaService.floor.findFirst({
-        where: { id: floorId },
-      });
+      const userId = extractUserId(accessToken, this.jwtService);
 
+      const [user, floor] = await Promise.all([
+        this.prismaService.user.findFirst({ where: { id: userId } }),
+        this.prismaService.floor.findFirst({
+          where: { id: floorId },
+        }),
+      ]);
+
+      if (!user) notFound(`User`, userId);
       if (!floor) notFound('Floor', floorId);
 
       await this.prismaService.floor.update({
         where: { id: floorId },
         data: updateFloorDto,
       });
-
-      const userId = extractUserId(accessToken, this.jwtService);
 
       await this.prismaService.log.create({
         data: {
@@ -226,18 +230,22 @@ export class FloorService {
     accessToken: string,
   ): Promise<RemoveById> {
     try {
-      const floor = await this.prismaService.floor.findFirst({
-        where: { id: floorId },
-      });
+      const userId = extractUserId(accessToken, this.jwtService);
 
+      const [user, floor] = await Promise.all([
+        this.prismaService.user.findFirst({ where: { id: userId } }),
+        this.prismaService.floor.findFirst({
+          where: { id: floorId },
+        }),
+      ]);
+
+      if (!user) notFound(`User`, userId);
       if (!floor) notFound('Floor', floorId);
 
       await this.prismaService.floor.update({
         where: { id: floorId },
         data: { isDeleted: true },
       });
-
-      const userId = extractUserId(accessToken, this.jwtService);
 
       await this.prismaService.log.create({
         data: {
@@ -261,15 +269,19 @@ export class FloorService {
     accessToken: string,
   ): Promise<RemoveById> {
     try {
-      const floor = await this.prismaService.floor.findFirst({
-        where: { id: floorId, isDeleted: false },
-      });
+      const userId = extractUserId(accessToken, this.jwtService);
 
+      const [user, floor] = await Promise.all([
+        this.prismaService.user.findFirst({ where: { id: userId } }),
+        this.prismaService.floor.findFirst({
+          where: { id: floorId },
+        }),
+      ]);
+
+      if (!user) notFound(`User`, userId);
       if (!floor) notFound('Floor', floorId);
 
       await this.prismaService.floor.delete({ where: { id: floorId } });
-
-      const userId = extractUserId(accessToken, this.jwtService);
 
       await this.prismaService.log.create({
         data: {
@@ -293,10 +305,16 @@ export class FloorService {
     accessToken: string,
   ): Promise<RetrieveById> {
     try {
-      const floor = await this.prismaService.floor.findFirst({
-        where: { id: floorId, isDeleted: true },
-      });
+      const userId = extractUserId(accessToken, this.jwtService);
 
+      const [user, floor] = await Promise.all([
+        this.prismaService.user.findFirst({ where: { id: userId } }),
+        this.prismaService.floor.findFirst({
+          where: { id: floorId },
+        }),
+      ]);
+
+      if (!user) notFound('User', userId);
       if (!floor) notFound('Floor', floorId);
 
       await this.prismaService.floor.update({
@@ -305,8 +323,6 @@ export class FloorService {
           isDeleted: false,
         },
       });
-
-      const userId = extractUserId(accessToken, this.jwtService);
 
       await this.prismaService.log.create({
         data: {

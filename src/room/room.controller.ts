@@ -23,6 +23,7 @@ import extractAccessToken from 'src/utils/functions/extractAccessToken';
 import { Create, FindMany } from 'src/utils/types/types';
 import { FindAllDto } from 'src/utils/common/find-all.dto';
 import { CreateRoomDto } from './dto/create-room.dto';
+import { RateLimit } from 'nestjs-rate-limiter';
 
 @Controller('room')
 export class RoomController {
@@ -31,6 +32,12 @@ export class RoomController {
   constructor(private readonly roomService: RoomService) {}
 
   @Post()
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before creating a new room.',
+    keyPrefix: 'create-room',
+    points: 10,
+  })
   create(
     @Body() createRoomDto: CreateRoomDto,
     @Req() req: Request,
@@ -47,6 +54,12 @@ export class RoomController {
   }
 
   @Get()
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before loading all rooms.',
+    keyPrefix: 'get-rooms',
+    points: 10,
+  })
   findAll(@Query() query: FindAllDto): Promise<FindMany> {
     return this.roomService.findRooms(query);
   }
@@ -73,6 +86,12 @@ export class RoomController {
       },
     }),
   )
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before uploading images for a room.',
+    keyPrefix: 'upload-room-image',
+    points: 10,
+  })
   upload(
     @Param('roomId', ParseIntPipe) roomId: number,
     @UploadedFiles() files: Express.Multer.File[],
@@ -90,6 +109,12 @@ export class RoomController {
   }
 
   @Delete(':roomId/delete-images')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before deleting room images.',
+    keyPrefix: 'delete-room-images',
+    points: 10,
+  })
   unbindRoomSelectedImages(
     @Param('roomId', ParseIntPipe) roomId: number,
     @Query('imageIds') imageIds: string,
@@ -111,6 +136,12 @@ export class RoomController {
   }
 
   @Patch(':roomId')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before updating a room.',
+    keyPrefix: 'update-room',
+    points: 10,
+  })
   update(
     @Param('roomId', ParseIntPipe) roomId: number,
     @Body() updateRoomDto: UpdateRoomDto,
@@ -132,6 +163,12 @@ export class RoomController {
   }
 
   @Delete(':roomId/soft-delete')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before deleting a room.',
+    keyPrefix: 'soft-delete-floor',
+    points: 10,
+  })
   softRemove(
     @Param('roomId', ParseIntPipe) roomId: number,
     @Req() req: Request,
@@ -148,6 +185,12 @@ export class RoomController {
   }
 
   @Delete(':roomId')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before purging the room.',
+    keyPrefix: 'purge-room',
+    points: 10,
+  })
   remove(@Param('roomId', ParseIntPipe) roomId: number, @Req() req: Request) {
     try {
       const accessToken = extractAccessToken(req);
@@ -161,6 +204,12 @@ export class RoomController {
   }
 
   @Patch(':roomId/retrieve')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before retrieving a room.',
+    keyPrefix: 'retrieve-room',
+    points: 10,
+  })
   retrieve(@Param('roomId', ParseIntPipe) roomId: number, @Req() req: Request) {
     try {
       const accessToken = extractAccessToken(req);

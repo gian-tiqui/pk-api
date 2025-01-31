@@ -39,7 +39,7 @@ export class FloorController {
   @Post()
   @RateLimit({
     duration: 60,
-    errorMessage: 'Please wait before creating a new room.',
+    errorMessage: 'Please wait before creating a new floor.',
     keyPrefix: 'create-floor',
     points: 10,
   })

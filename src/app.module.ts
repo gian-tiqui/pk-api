@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { RoomModule } from './room/room.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { DepartmentModule } from './department/department.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { join } from 'path';
       serveRoot: '/uploads',
     }),
     RoomModule,
+    DepartmentModule,
   ],
   providers: [PrismaService],
 })

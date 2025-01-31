@@ -168,18 +168,22 @@ export class RoomService {
     accessToken: string,
   ) {
     try {
-      const room = await this.prismaService.room.findFirst({
-        where: { id: roomId },
-      });
+      const userId = extractUserId(accessToken, this.jwtService);
 
+      const [user, room] = await Promise.all([
+        this.prismaService.user.findFirst({ where: { id: userId } }),
+        this.prismaService.room.findFirst({
+          where: { id: roomId },
+        }),
+      ]);
+
+      if (!user) notFound(`User`, userId);
       if (!room) notFound('Room', roomId);
 
       await this.prismaService.room.update({
         where: { id: roomId },
         data: updateRoomDto,
       });
-
-      const userId = extractUserId(accessToken, this.jwtService);
 
       await this.prismaService.log.create({
         data: {
@@ -327,18 +331,22 @@ export class RoomService {
 
   async softRemoveRoomById(roomId: number, accessToken: string) {
     try {
-      const room = await this.prismaService.room.findFirst({
-        where: { id: roomId },
-      });
+      const userId = extractUserId(accessToken, this.jwtService);
 
+      const [user, room] = await Promise.all([
+        this.prismaService.user.findFirst({ where: { id: userId } }),
+        this.prismaService.room.findFirst({
+          where: { id: roomId },
+        }),
+      ]);
+
+      if (!user) notFound(`User`, userId);
       if (!room) notFound('Room', roomId);
 
       await this.prismaService.room.update({
         where: { id: roomId },
         data: { isDeleted: true },
       });
-
-      const userId = extractUserId(accessToken, this.jwtService);
 
       await this.prismaService.log.create({
         data: {
@@ -359,15 +367,19 @@ export class RoomService {
 
   async deleteRoomById(roomId: number, accessToken: string) {
     try {
-      const room = await this.prismaService.room.findFirst({
-        where: { id: roomId, isDeleted: false },
-      });
+      const userId = extractUserId(accessToken, this.jwtService);
 
+      const [user, room] = await Promise.all([
+        this.prismaService.user.findFirst({ where: { id: userId } }),
+        this.prismaService.room.findFirst({
+          where: { id: roomId },
+        }),
+      ]);
+
+      if (!user) notFound(`User`, userId);
       if (!room) notFound('Room', roomId);
 
       await this.prismaService.room.delete({ where: { id: roomId } });
-
-      const userId = extractUserId(accessToken, this.jwtService);
 
       await this.prismaService.log.create({
         data: {
@@ -388,10 +400,16 @@ export class RoomService {
 
   async retrieveRoomById(roomId: number, accessToken: string) {
     try {
-      const room = await this.prismaService.room.findFirst({
-        where: { id: roomId, isDeleted: true },
-      });
+      const userId = extractUserId(accessToken, this.jwtService);
 
+      const [user, room] = await Promise.all([
+        this.prismaService.user.findFirst({ where: { id: userId } }),
+        this.prismaService.room.findFirst({
+          where: { id: roomId },
+        }),
+      ]);
+
+      if (!user) notFound(`User`, userId);
       if (!room) notFound('Room', roomId);
 
       await this.prismaService.room.update({
@@ -400,8 +418,6 @@ export class RoomService {
           isDeleted: false,
         },
       });
-
-      const userId = extractUserId(accessToken, this.jwtService);
 
       await this.prismaService.log.create({
         data: {
