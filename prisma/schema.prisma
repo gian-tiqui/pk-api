@@ -19,12 +19,14 @@ model User {
   middleName        String?
   lastName          String
   isDeleted         Boolean    @default(false)
-  employeeId        String        @unique
+  employeeId        String     @unique
   password          String
   deptId            Int        
   department        Department @relation(fields: [deptId], references: [id])
   refreshToken      String?    @unique
   logs              Log[]
+  secretQuestion    String?
+  secretAnswer      String?
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 }
