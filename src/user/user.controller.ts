@@ -18,6 +18,7 @@ import { FindAllDto } from 'src/utils/common/find-all.dto';
 import errorHandler from 'src/utils/functions/errorHandler';
 import extractAccessToken from 'src/utils/functions/extractAccessToken';
 import { RateLimit } from 'nestjs-rate-limiter';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('user')
 export class UserController {
@@ -82,6 +83,32 @@ export class UserController {
       return this.userService.updateUserById(
         userId,
         updateUserDto,
+        accessToken,
+      );
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
+
+  @Patch(':userId/change-password')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before changing your password.',
+    keyPrefix: 'change-password',
+    points: 10,
+  })
+  changePassword(
+    @Body() changePasswordDto: ChangePasswordDto,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Req() req: Request,
+  ) {
+    try {
+      const accessToken = extractAccessToken(req);
+
+      return this.userService.changePassword(
+        changePasswordDto.oldPassword,
+        changePasswordDto.newPassword,
+        userId,
         accessToken,
       );
     } catch (error) {

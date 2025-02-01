@@ -7,6 +7,7 @@ import { FindAllDto } from 'src/utils/common/find-all.dto';
 import extractUserId from 'src/utils/functions/extractUserId';
 import notFound from 'src/utils/functions/notFound';
 import { LogMethod, LogType } from 'src/utils/enums/enum';
+import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import getPreviousValues from 'src/utils/functions/getPreviousValues';
 
@@ -75,7 +76,27 @@ export class UserService {
   }
 
   async findUserById(userId: number) {
-    return `This action returns a #${userId} user`;
+    try {
+      const user = await this.prismaService.user.findFirst({
+        where: { id: userId },
+        select: {
+          firstName: true,
+          middleName: true,
+          lastName: true,
+          secretQuestion: true,
+          secretAnswer: true,
+        },
+      });
+
+      if (!user) notFound(`User`, userId);
+
+      return {
+        message: `User with the id ${userId} found.`,
+        user,
+      };
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
   }
 
   async updateUserById(
@@ -110,6 +131,56 @@ export class UserService {
 
       return {
         message: `User with the id ${userId} updated successfully.`,
+      };
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
+
+  async changePassword(
+    oldPassword: string,
+    newPassword: string,
+    userId: number,
+    accessToken: string,
+  ) {
+    try {
+      const id = extractUserId(accessToken, this.jwtService);
+
+      const [updater, user] = await Promise.all([
+        this.prismaService.user.findFirst({
+          where: { id },
+        }),
+        this.prismaService.user.findFirst({
+          where: { id: userId },
+        }),
+      ]);
+
+      if (!updater) notFound(`User`, id);
+      if (!user) notFound(`User`, userId);
+
+      const passwordsMatched = await argon.verify(user.password, oldPassword);
+
+      if (!passwordsMatched)
+        throw new BadRequestException('You entered an incorrect password.');
+
+      const newHashedPassword = await argon.hash(newPassword);
+
+      await this.prismaService.user.update({
+        where: { id: userId },
+        data: { password: newHashedPassword },
+      });
+
+      await this.prismaService.log.create({
+        data: {
+          log: { oldPassword },
+          userId,
+          typeId: LogType.USER,
+          methodId: LogMethod.UPDATE,
+        },
+      });
+
+      return {
+        message: `Password of the user with the id ${userId} updated successfully.`,
       };
     } catch (error) {
       errorHandler(error, this.logger);

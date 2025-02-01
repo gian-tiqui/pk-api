@@ -7,7 +7,6 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-
 import * as argon from 'argon2';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import {
@@ -77,6 +76,7 @@ export class AuthService {
       const accessToken = await this.signToken(
         user.id,
         user.firstName,
+        user.middleName,
         user.lastName,
         user.department.id,
         user.department.name,
@@ -125,6 +125,7 @@ export class AuthService {
       const accessToken = await this.signToken(
         user.id,
         user.firstName,
+        user.middleName,
         user.lastName,
         user.department.id,
         user.department.name,
@@ -161,6 +162,7 @@ export class AuthService {
   private async signToken(
     userId: number,
     firstName: string,
+    middleName: string,
     lastName: string,
     deptId: number,
     deptName: string,
@@ -169,6 +171,7 @@ export class AuthService {
     return this.jwtService.signAsync({
       sub: userId,
       firstName,
+      middleName,
       lastName,
       deptId,
       deptName,
