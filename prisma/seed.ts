@@ -130,7 +130,7 @@ const seedUsers = async () => {
       firstName: 'Niel',
       lastName: 'Marketing',
       employeeId: '00001111',
-      deptId: 3,
+      deptId: 4,
     },
   ];
 
