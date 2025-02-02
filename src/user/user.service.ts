@@ -1,4 +1,11 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import errorHandler from 'src/utils/functions/errorHandler';
@@ -83,8 +90,6 @@ export class UserService {
           firstName: true,
           middleName: true,
           lastName: true,
-          secretQuestion: true,
-          secretAnswer: true,
         },
       });
 
@@ -93,6 +98,34 @@ export class UserService {
       return {
         message: `User with the id ${userId} found.`,
         user,
+      };
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
+
+  async findUserQuestionAndAnswerById(userId: number) {
+    try {
+      const user = await this.prismaService.user.findFirst({
+        where: { id: userId },
+        include: { secretQuestion: { select: { question: true } } },
+      });
+
+      if (!user) notFound(`User`, userId);
+
+      if (!user.secretQuestionId) {
+        return {
+          message: 'User does not have a secret yet.',
+          secret: 'none',
+        };
+      }
+
+      return {
+        message: 'User secrets loaded successfully.',
+        secret: {
+          question: user.secretQuestion.question || null,
+          answer: user.secretAnswer || null,
+        },
       };
     } catch (error) {
       errorHandler(error, this.logger);
@@ -181,6 +214,55 @@ export class UserService {
 
       return {
         message: `Password of the user with the id ${userId} updated successfully.`,
+      };
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
+
+  async updateUserSecretById(
+    userId: number,
+    questionId: number,
+    answer: string,
+    accessToken: string,
+  ) {
+    try {
+      const id = extractUserId(accessToken, this.jwtService);
+
+      const [updater, user] = await Promise.all([
+        this.prismaService.user.findFirst({ where: { id } }),
+        this.prismaService.user.findFirst({ where: { id: userId } }),
+      ]);
+
+      if (!updater) notFound(`User`, id);
+      if (!user) notFound(`User`, userId);
+
+      const updatedUser = await this.prismaService.user.update({
+        where: { id: userId },
+        data: { secretQuestionId: questionId, secretAnswer: answer },
+      });
+
+      await this.prismaService.log.create({
+        data: {
+          log: getPreviousValues(user, updatedUser),
+          userId: id,
+          typeId: LogType.USER,
+          methodId: LogMethod.UPDATE,
+        },
+      });
+
+      const question = await this.prismaService.secretQuestion.findFirst({
+        where: { id: questionId },
+      });
+
+      if (!question) notFound(`Question`, questionId);
+
+      return {
+        message: `User with the id ${userId} secret updated successfully.`,
+        secrets: {
+          question: question.question,
+          answer: updatedUser.secretAnswer,
+        },
       };
     } catch (error) {
       errorHandler(error, this.logger);
