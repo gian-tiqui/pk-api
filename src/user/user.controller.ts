@@ -65,6 +65,17 @@ export class UserController {
     return this.userService.findUserById(userId);
   }
 
+  @Get(':userId/secret')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before loading the secret of a user.',
+    keyPrefix: 'find-user-secret',
+    points: 10,
+  })
+  findSecret(@Param('userId', ParseIntPipe) userId: number) {
+    return this.userService.findUserQuestionAndAnswerById(userId);
+  }
+
   @Patch(':userId')
   @RateLimit({
     duration: 60,
@@ -109,6 +120,33 @@ export class UserController {
         changePasswordDto.oldPassword,
         changePasswordDto.newPassword,
         userId,
+        accessToken,
+      );
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
+
+  @Patch(':userId/update-secret')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before updating your secret.',
+    keyPrefix: 'change-secret',
+    points: 10,
+  })
+  changeSecret(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('questionId', ParseIntPipe) questionId: number,
+    @Query('answer') answer: string,
+    @Req() req: Request,
+  ) {
+    try {
+      const accessToken = extractAccessToken(req);
+
+      return this.userService.updateUserSecretById(
+        userId,
+        questionId,
+        answer,
         accessToken,
       );
     } catch (error) {

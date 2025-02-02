@@ -25,7 +25,8 @@ model User {
   department        Department @relation(fields: [deptId], references: [id])
   refreshToken      String?    @unique
   logs              Log[]
-  secretQuestion    String?
+  secretQuestionId  Int?
+  secretQuestion    SecretQuestion? @relation(fields: [secretQuestionId], references: [id])
   secretAnswer      String?
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
@@ -109,6 +110,14 @@ model LogType {
   id                Int        @id @default(autoincrement())
   type              String     @unique
   logs              Log[]
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+model SecretQuestion {
+  id                Int        @id @default(autoincrement())
+  question          String
+  user              User[]
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 }

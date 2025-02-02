@@ -8,6 +8,7 @@ import { RoomModule } from './room/room.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { DepartmentModule } from './department/department.module';
+import { SecretQuestionModule } from './secret-question/secret-question.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { DepartmentModule } from './department/department.module';
     }),
     RoomModule,
     DepartmentModule,
+    SecretQuestionModule,
   ],
   providers: [PrismaService],
 })

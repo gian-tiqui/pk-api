@@ -124,6 +124,37 @@ const seedDepartments = async () => {
   console.log('Department seeded.');
 };
 
+const seedQuestions = async () => {
+  const questions: string[] = [
+    'What was the name of your first pet?',
+    "What is your mother's maiden name?",
+    'What was the name of your first school?',
+    'In what city were you born?',
+    'What is the name of your favorite childhood teacher?',
+    'What is your favorite movie?',
+    'What was your childhood nickname?',
+    'What is your favorite book?',
+    'What is your favorite food?',
+    'What is the name of the street you grew up on?',
+    'What was your first car?',
+    'Who was your childhood best friend?',
+    'What is your favorite vacation destination?',
+    'What was the name of your first stuffed animal?',
+    'What is the middle name of your oldest sibling?',
+    'What was the name of your first boss?',
+    'What is your favorite sports team?',
+    'What is the name of the first concert you attended?',
+    'What is the name of your first crush?',
+    'What was your dream job as a child?',
+  ];
+
+  questions.map(async (question) => {
+    await prismaClient.secretQuestion.create({ data: { question } });
+  });
+
+  console.log('Questions seeded.');
+};
+
 const seedUsers = async () => {
   const users = [
     {
@@ -151,6 +182,7 @@ const main = async () => {
   await seedDivision();
   await seedDepartments();
   await seedUsers();
+  await seedQuestions();
 };
 
 main().catch((err) => console.error(err));
