@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { Messages } from '../enums/enum';
@@ -16,7 +17,8 @@ const errorHandler = (
 
   if (
     error instanceof NotFoundException ||
-    error instanceof BadRequestException
+    error instanceof BadRequestException ||
+    error instanceof UnauthorizedException
   ) {
     throw error;
   }

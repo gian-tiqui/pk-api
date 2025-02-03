@@ -3,6 +3,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
@@ -20,6 +21,8 @@ import {
 import errorHandler from 'src/utils/functions/errorHandler';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import notFound from 'src/utils/functions/notFound';
 
 @Injectable()
 export class AuthService {
@@ -177,6 +180,51 @@ export class AuthService {
       deptName,
       deptCode,
     });
+  }
+
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+    try {
+      const user = await this.prismaService.user.findFirst({
+        where: {
+          AND: [
+            { secretQuestionId: forgotPasswordDto.questionId },
+            { secretAnswer: forgotPasswordDto.answer },
+            { employeeId: forgotPasswordDto.employeeId },
+          ],
+        },
+      });
+
+      if (!user)
+        throw new UnauthorizedException(
+          `You have entered the wrong secrets for the user with the employee id ${forgotPasswordDto.employeeId}`,
+        );
+
+      return {
+        message: 'You can now reset your password',
+        id: user.id,
+      };
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
+
+  async changePassword(userId: number, newPassword: string) {
+    const user = await this.prismaService.user.findFirst({
+      where: { id: userId },
+    });
+
+    if (!user) notFound(`User`, userId);
+
+    const hashedPassword = await argon.hash(newPassword);
+
+    await this.prismaService.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    return {
+      message: `Password has been reset.`,
+    };
   }
 
   private async signRefreshToken(userId: number): SignRefreshToken {
