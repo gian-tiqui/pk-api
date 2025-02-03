@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Logger,
   ParseIntPipe,
   Patch,
   Post,
@@ -12,9 +13,13 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RateLimit } from 'nestjs-rate-limiter';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { Register, Login, Refresh, Logout } from 'src/utils/types/types';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ChangePasswordAuthDto } from './dto/change-password-auth.dto';
 
 @Controller('auth')
 export class AuthController {
+  private logger: Logger = new Logger('AuthController');
+
   constructor(private readonly authService: AuthService) {}
 
   @RateLimit({
@@ -59,5 +64,18 @@ export class AuthController {
   @Patch('logout')
   logout(@Query('userId', ParseIntPipe) userId: number): Promise<Logout> {
     return this.authService.logout(userId);
+  }
+
+  @Post('forgot-password')
+  forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(forgotPasswordDto);
+  }
+
+  @Post('change-password')
+  changePassword(@Body() changePasswordDto: ChangePasswordAuthDto) {
+    return this.authService.changePassword(
+      changePasswordDto.userId,
+      changePasswordDto.newPassword,
+    );
   }
 }
