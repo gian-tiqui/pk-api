@@ -147,6 +147,7 @@ export class FloorService {
             { code: { contains: search, mode: 'insensitive' } },
           ],
         }),
+        floorId,
       };
 
       const rooms = await this.prismaService.room.findMany({
