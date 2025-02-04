@@ -19,6 +19,7 @@ import {
   RetrieveById,
   UpdateById,
 } from 'src/utils/types/types';
+import convertDatesToString from 'src/utils/functions/convertDatesToString';
 
 @Injectable()
 export class FloorService {
@@ -102,6 +103,8 @@ export class FloorService {
         where,
       });
 
+      convertDatesToString(floors);
+
       return {
         message: 'Floors loaded successfully.',
         count,
@@ -158,6 +161,8 @@ export class FloorService {
       });
 
       const count = await this.prismaService.room.count({ where });
+
+      convertDatesToString(rooms);
 
       return {
         message: `Rooms of the floor with the id ${floorId} found.`,
