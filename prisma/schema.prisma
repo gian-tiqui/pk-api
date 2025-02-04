@@ -28,6 +28,8 @@ model User {
   secretQuestionId  Int?
   secretQuestion    SecretQuestion? @relation(fields: [secretQuestionId], references: [id])
   secretAnswer      String?
+  floors            Floor[]
+  rooms             Room[]
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 }
@@ -57,6 +59,8 @@ model Floor {
   code              String     
   isDeleted         Boolean    @default(false)
   rooms             Room[]
+  creatorId         Int
+  creator           User       @relation(fields: [creatorId], references: [id])
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 }
@@ -70,6 +74,8 @@ model Room {
   floor             Floor      @relation(fields: [floorId], references: [id], onDelete: Cascade)
   images            RoomImages[]
   isDeleted         Boolean    @default(false)
+  creatorId         Int
+  creator           User       @relation(fields: [creatorId], references: [id])
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 }

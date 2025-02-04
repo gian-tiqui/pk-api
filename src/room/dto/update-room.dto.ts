@@ -16,4 +16,8 @@ export class UpdateRoomDto {
   @IsInt()
   @IsOptional()
   floorId: number;
+
+  @IsInt()
+  @IsOptional()
+  creatorId: number;
 }

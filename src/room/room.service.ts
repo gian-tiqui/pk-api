@@ -65,7 +65,7 @@ export class RoomService {
       if (room) dataExists('Room');
 
       const newRoom = await this.prismaService.room.create({
-        data: createRoomDto,
+        data: { ...createRoomDto, creatorId: id },
       });
 
       await this.prismaService.log.create({

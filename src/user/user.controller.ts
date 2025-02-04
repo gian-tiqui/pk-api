@@ -190,4 +190,29 @@ export class UserController {
       errorHandler(error, this.logger);
     }
   }
+
+  @Post(':userId/verify')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before verifying your password.',
+    keyPrefix: 'verify-user-password',
+    points: 10,
+  })
+  verify(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('password') password: string,
+    @Req() req: Request,
+  ) {
+    try {
+      const accessToken = extractAccessToken(req);
+
+      return this.userService.verifyUserPasswordById(
+        userId,
+        password,
+        accessToken,
+      );
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
 }

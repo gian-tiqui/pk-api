@@ -54,7 +54,7 @@ export class FloorService {
       if (floor) dataExists(`Floor`);
 
       const newFloor = await this.prismaService.floor.create({
-        data: createFloorDto,
+        data: { ...createFloorDto, creatorId: userId },
       });
 
       await this.prismaService.log.create({
