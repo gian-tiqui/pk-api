@@ -163,6 +163,12 @@ const seedUsers = async () => {
       employeeId: '00001111',
       deptId: 4,
     },
+    {
+      firstName: 'Juan',
+      lastName: 'Dela Cruz',
+      employeeId: '00001112',
+      deptId: 4,
+    },
   ];
 
   for (const user of users) {
