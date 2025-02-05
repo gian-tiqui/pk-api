@@ -9,10 +9,6 @@ export class CreateRoomDto {
   @IsNotEmpty()
   code: string;
 
-  @IsString()
-  @IsNotEmpty()
-  detail: string;
-
   @IsInt()
   @IsNotEmpty()
   floorId: number;

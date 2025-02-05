@@ -140,18 +140,32 @@ export class FloorService {
 
       if (!floor) notFound('Floor', floorId);
 
-      const { offset, limit, search, sortBy, sortOrder } = query;
+      const {
+        offset,
+        limit,
+        search,
+        sortBy,
+        sortOrder,
+        isDeleted,
+        isIncomplete,
+      } = query;
       const orderBy = sortBy ? { [sortBy]: sortOrder || 'asc' } : undefined;
 
-      const where: Prisma.RoomWhereInput = {
-        ...(search && {
-          OR: [
-            { name: { contains: search, mode: 'insensitive' } },
-            { code: { contains: search, mode: 'insensitive' } },
-          ],
-        }),
-        floorId,
-      };
+      const where: Prisma.RoomWhereInput = isIncomplete
+        ? {
+            detail: null,
+          }
+        : {
+            ...(search && {
+              OR: [
+                { name: { contains: search, mode: 'insensitive' } },
+                { code: { contains: search, mode: 'insensitive' } },
+                { detail: { contains: search, mode: 'insensitive' } },
+              ],
+            }),
+            floorId,
+            ...(isDeleted && { isDeleted }),
+          };
 
       const rooms = await this.prismaService.room.findMany({
         where,
