@@ -143,6 +143,7 @@ export class RoomService {
       const room = await this.prismaService.room.findFirst({
         where: { id: roomId },
         include: {
+          floor: { select: { name: true } },
           images: {
             where: { isDeleted: roomImageDeleted ? roomImageDeleted : false },
 
