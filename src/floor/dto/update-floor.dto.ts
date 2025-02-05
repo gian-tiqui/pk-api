@@ -12,4 +12,8 @@ export class UpdateFloorDto {
   @IsString()
   @IsOptional()
   code: string;
+
+  @IsInt()
+  @IsOptional()
+  creatorId: number;
 }

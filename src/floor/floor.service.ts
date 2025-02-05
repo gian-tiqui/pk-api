@@ -19,6 +19,7 @@ import {
   RetrieveById,
   UpdateById,
 } from 'src/utils/types/types';
+import convertDatesToString from 'src/utils/functions/convertDatesToString';
 
 @Injectable()
 export class FloorService {
@@ -54,7 +55,7 @@ export class FloorService {
       if (floor) dataExists(`Floor`);
 
       const newFloor = await this.prismaService.floor.create({
-        data: createFloorDto,
+        data: { ...createFloorDto, creatorId: userId },
       });
 
       await this.prismaService.log.create({
@@ -102,6 +103,8 @@ export class FloorService {
         where,
       });
 
+      convertDatesToString(floors);
+
       return {
         message: 'Floors loaded successfully.',
         count,
@@ -137,18 +140,32 @@ export class FloorService {
 
       if (!floor) notFound('Floor', floorId);
 
-      const { offset, limit, search, sortBy, sortOrder } = query;
+      const {
+        offset,
+        limit,
+        search,
+        sortBy,
+        sortOrder,
+        isDeleted,
+        isIncomplete,
+      } = query;
       const orderBy = sortBy ? { [sortBy]: sortOrder || 'asc' } : undefined;
 
-      const where: Prisma.RoomWhereInput = {
-        ...(search && {
-          OR: [
-            { name: { contains: search, mode: 'insensitive' } },
-            { code: { contains: search, mode: 'insensitive' } },
-          ],
-        }),
-        floorId,
-      };
+      const where: Prisma.RoomWhereInput = isIncomplete
+        ? {
+            detail: null,
+          }
+        : {
+            ...(search && {
+              OR: [
+                { name: { contains: search, mode: 'insensitive' } },
+                { code: { contains: search, mode: 'insensitive' } },
+                { detail: { contains: search, mode: 'insensitive' } },
+              ],
+            }),
+            floorId,
+            ...(isDeleted && { isDeleted }),
+          };
 
       const rooms = await this.prismaService.room.findMany({
         where,
@@ -158,6 +175,8 @@ export class FloorService {
       });
 
       const count = await this.prismaService.room.count({ where });
+
+      convertDatesToString(rooms);
 
       return {
         message: `Rooms of the floor with the id ${floorId} found.`,

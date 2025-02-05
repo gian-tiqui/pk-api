@@ -1,11 +1,4 @@
-import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import errorHandler from 'src/utils/functions/errorHandler';
@@ -273,5 +266,33 @@ export class UserService {
 
   async removeUserById(userId: number, accessToken: string) {
     return `This action removes a #${userId} user`;
+  }
+
+  async verifyUserPasswordById(
+    userId: number,
+    password: string,
+    accessToken: string,
+  ) {
+    try {
+      const id = extractUserId(accessToken, this.jwtService);
+
+      if (userId !== id) throw new BadRequestException(`Ids mismatch.`);
+
+      const user = await this.prismaService.user.findFirst({
+        where: { id },
+      });
+
+      const passwordValid = await argon.verify(user.password, password);
+
+      if (!passwordValid)
+        throw new BadRequestException(`Password is incorrect.`);
+
+      return {
+        message: 'User is verified',
+        userId: id,
+      };
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
   }
 }
