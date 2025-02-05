@@ -154,6 +154,8 @@ export class FloorService {
       const where: Prisma.RoomWhereInput = isIncomplete
         ? {
             detail: null,
+            floorId,
+            isDeleted,
           }
         : {
             ...(search && {
@@ -164,7 +166,7 @@ export class FloorService {
               ],
             }),
             floorId,
-            ...(isDeleted && { isDeleted }),
+            ...(isDeleted ? { isDeleted } : { isDeleted: false }),
           };
 
       const rooms = await this.prismaService.room.findMany({
