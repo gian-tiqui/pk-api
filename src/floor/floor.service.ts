@@ -1,10 +1,16 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreateFloorDto } from './dto/create-floor.dto';
 import { UpdateFloorDto } from './dto/update-floor.dto';
 import errorHandler from 'src/utils/functions/errorHandler';
+import { promises as fs } from 'fs';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import { LogMethod, LogType, PaginationDefault } from 'src/utils/enums/enum';
+import {
+  Directory,
+  LogMethod,
+  LogType,
+  PaginationDefault,
+} from 'src/utils/enums/enum';
 import { FindAllDto } from 'src/utils/common/find-all.dto';
 import extractUserId from 'src/utils/functions/extractUserId';
 import getPreviousValues from 'src/utils/functions/getPreviousValues';
@@ -20,6 +26,8 @@ import {
   UpdateById,
 } from 'src/utils/types/types';
 import convertDatesToString from 'src/utils/functions/convertDatesToString';
+import * as path from 'path';
+import generateUniqueSuffix from 'src/utils/functions/generateUniqueSuffix';
 
 @Injectable()
 export class FloorService {
@@ -241,6 +249,62 @@ export class FloorService {
 
       return {
         message: `Floor with the id ${floorId} updated successfully.`,
+      };
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
+
+  async uploadFloorMapById(
+    floorId: number,
+    file: Express.Multer.File,
+    accessToken: string,
+  ) {
+    try {
+      const id = extractUserId(accessToken, this.jwtService);
+
+      const [user, floor] = await Promise.all([
+        this.prismaService.user.findFirst({ where: { id } }),
+        this.prismaService.floor.findFirst({ where: { id: floorId } }),
+      ]);
+
+      if (!user) notFound(`User`, id);
+      if (!floor) notFound(`Floor`, floorId);
+      if (!file) throw new BadRequestException(`Floor map is required.`);
+
+      const dir = path.join(
+        __dirname,
+        '..',
+        '..',
+        '..',
+        Directory.UPLOAD,
+        Directory.FLOOR_IMAGES,
+      );
+
+      await fs.mkdir(dir, { recursive: true });
+
+      const fileName = generateUniqueSuffix(floorId, file.originalname);
+
+      const filePath = path.join(dir, fileName);
+
+      await fs.writeFile(filePath, file.buffer);
+
+      await this.prismaService.floor.update({
+        where: { id: floorId },
+        data: { imageLocation: fileName },
+      });
+
+      await this.prismaService.log.create({
+        data: {
+          log: { imageLocation: fileName },
+          userId: user.id,
+          typeId: LogType.ROOM,
+          methodId: LogMethod.UPDATE,
+        },
+      });
+
+      return {
+        message: `Map has been set to the floor with the id ${floorId}`,
       };
     } catch (error) {
       errorHandler(error, this.logger);

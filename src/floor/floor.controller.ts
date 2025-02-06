@@ -12,6 +12,8 @@ import {
   // UseGuards,
   Query,
   ParseIntPipe,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { FloorService } from './floor.service';
 import { CreateFloorDto } from './dto/create-floor.dto';
@@ -28,6 +30,7 @@ import {
   UpdateById,
 } from 'src/utils/types/types';
 import { RateLimit } from 'nestjs-rate-limiter';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 // @UseGuards(JwtAuthGuard)
 @Controller('floor')
@@ -130,6 +133,40 @@ export class FloorController {
         updateFloorDto,
         accessToken,
       );
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
+
+  @Patch(':floorId/upload')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before updating a floor.',
+    keyPrefix: 'update-floor-by-id',
+    points: 10,
+  })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      fileFilter: (req, file, callback) => {
+        if (!file.mimetype.startsWith('image/')) {
+          return callback(
+            new BadRequestException('Only image files are allowed!'),
+            false,
+          );
+        }
+        callback(null, true);
+      },
+    }),
+  )
+  upload(
+    @Param('floorId', ParseIntPipe) floorId: number,
+    @UploadedFile('file') file: Express.Multer.File,
+    @Req() req: Request,
+  ) {
+    try {
+      const accessToken = extractAccessToken(req);
+
+      return this.floorService.uploadFloorMapById(floorId, file, accessToken);
     } catch (error) {
       errorHandler(error, this.logger);
     }

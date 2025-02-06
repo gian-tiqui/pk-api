@@ -26,6 +26,7 @@ enum PaginationDefault {
 enum Directory {
   UPLOAD = 'uploads',
   ROOM_IMAGES = 'room_images',
+  FLOOR_IMAGES = 'floor_images',
 }
 
 export { Messages, LogMethod, LogType, PaginationDefault, Directory };

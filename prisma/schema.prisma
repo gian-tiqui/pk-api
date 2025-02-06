@@ -61,6 +61,7 @@ model Floor {
   rooms             Room[]
   creatorId         Int
   creator           User       @relation(fields: [creatorId], references: [id])
+  imageLocation     String?
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 }
@@ -75,6 +76,7 @@ model Room {
   images            RoomImages[]
   isDeleted         Boolean    @default(false)
   creatorId         Int
+  directionPattern  Json?
   creator           User       @relation(fields: [creatorId], references: [id])
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
