@@ -26,6 +26,7 @@ import getPreviousValues from 'src/utils/functions/getPreviousValues';
 import dataExists from 'src/utils/functions/dataExist';
 import generateUniqueSuffix from 'src/utils/functions/generateUniqueSuffix';
 import convertImagesIdsToIntArray from 'src/utils/functions/convertImageIdsToArray';
+import { AddDirectionDto } from './dto/add-direction.dto';
 
 @Injectable()
 export class RoomService {
@@ -262,6 +263,46 @@ export class RoomService {
 
       return {
         message: `Images uploaded to the room with the id ${roomId} successfully.`,
+      };
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
+
+  async setRoomDirectionPattern(
+    roomId: number,
+    addDirectionDto: AddDirectionDto,
+    accessToken: string,
+  ) {
+    try {
+      const id = extractUserId(accessToken, this.jwtService);
+
+      const [user, room] = await Promise.all([
+        this.prismaService.user.findFirst({ where: { id } }),
+        this.prismaService.room.findFirst({ where: { id: roomId } }),
+      ]);
+
+      if (!user) notFound(`User`, id);
+      if (!room) notFound(`Room`, roomId);
+
+      await this.prismaService.room.update({
+        where: { id: roomId },
+        data: {
+          directionPattern: addDirectionDto.directions,
+        },
+      });
+
+      await this.prismaService.log.create({
+        data: {
+          log: addDirectionDto.directions,
+          userId: id,
+          typeId: LogType.FLOOR,
+          methodId: LogMethod.UPDATE,
+        },
+      });
+
+      return {
+        message: `The room with the id ${roomId}'s directions added successfully.`,
       };
     } catch (error) {
       errorHandler(error, this.logger);

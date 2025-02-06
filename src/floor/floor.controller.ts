@@ -138,7 +138,7 @@ export class FloorController {
     }
   }
 
-  @Patch(':floorId/upload')
+  @Post(':floorId/upload')
   @RateLimit({
     duration: 60,
     errorMessage: 'Please wait before updating a floor.',

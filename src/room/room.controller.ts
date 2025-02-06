@@ -24,6 +24,7 @@ import { Create, FindMany } from 'src/utils/types/types';
 import { FindAllDto } from 'src/utils/common/find-all.dto';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { RateLimit } from 'nestjs-rate-limiter';
+import { AddDirectionDto } from './dto/add-direction.dto';
 
 @Controller('room')
 export class RoomController {
@@ -103,6 +104,31 @@ export class RoomController {
       if (!accessToken) throw new BadRequestException(`Token is missing`);
 
       return this.roomService.uploadRoomPhotosById(roomId, files, accessToken);
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
+
+  @Post(':floorId/directions')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before adding the directions.',
+    keyPrefix: 'room-directions',
+    points: 10,
+  })
+  addDirection(
+    @Param('floorId', ParseIntPipe) floorId: number,
+    @Body() addDirectionDto: AddDirectionDto,
+    @Req() req: Request,
+  ) {
+    try {
+      const accessToken = extractAccessToken(req);
+
+      return this.roomService.setRoomDirectionPattern(
+        floorId,
+        addDirectionDto,
+        accessToken,
+      );
     } catch (error) {
       errorHandler(error, this.logger);
     }
