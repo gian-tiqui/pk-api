@@ -61,6 +61,7 @@ model Floor {
   rooms             Room[]
   creatorId         Int
   creator           User       @relation(fields: [creatorId], references: [id])
+  imageLocation     String?
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 }

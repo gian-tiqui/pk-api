@@ -9,8 +9,7 @@ import { UpdateRoomDto } from './dto/update-room.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import errorHandler from 'src/utils/functions/errorHandler';
 import * as path from 'path';
-import { promises as fs, unlink, rename } from 'fs';
-import { promisify } from 'util';
+import { promises as fs } from 'fs';
 import { JwtService } from '@nestjs/jwt';
 import extractUserId from 'src/utils/functions/extractUserId';
 import notFound from 'src/utils/functions/notFound';
@@ -31,8 +30,6 @@ import convertImagesIdsToIntArray from 'src/utils/functions/convertImageIdsToArr
 @Injectable()
 export class RoomService {
   private logger: Logger = new Logger('RoomService');
-  private unlinkAsync = promisify(unlink);
-  private renameAsync = promisify(rename);
 
   constructor(
     private readonly prismaService: PrismaService,
@@ -259,7 +256,7 @@ export class RoomService {
           log: { imageLocations },
           userId: id,
           typeId: LogType.ROOM,
-          methodId: LogMethod.CREATE,
+          methodId: LogMethod.UPDATE,
         },
       });
 
