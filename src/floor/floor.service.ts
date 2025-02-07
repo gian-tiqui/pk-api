@@ -103,6 +103,7 @@ export class FloorService {
       const floors: Floor[] = await this.prismaService.floor.findMany({
         where,
         orderBy,
+        include: { rooms: true },
         skip: offset || PaginationDefault.OFFSET,
         take: limit || PaginationDefault.LIMIT,
       });
