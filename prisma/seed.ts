@@ -164,10 +164,16 @@ const seedUsers = async () => {
       deptId: 4,
     },
     {
-      firstName: 'Juan',
-      lastName: 'Dela Cruz',
+      firstName: 'Aldrin',
+      lastName: 'Gabrido',
       employeeId: '00001112',
-      deptId: 4,
+      deptId: 8,
+    },
+    {
+      firstName: 'Jonathan',
+      lastName: 'Quebral',
+      employeeId: '00001113',
+      deptId: 3,
     },
   ];
 
