@@ -303,6 +303,11 @@ export class FloorService {
         },
       });
 
+      await this.prismaService.room.updateMany({
+        where: { floorId },
+        data: { directionPattern: null },
+      });
+
       return {
         message: `Map has been set to the floor with the id ${floorId}`,
       };
