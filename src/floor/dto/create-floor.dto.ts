@@ -1,8 +1,11 @@
+import { Transform } from 'class-transformer';
 import { IsInt, IsNotEmpty, IsString } from 'class-validator';
+import sanitize from 'src/utils/functions/sanitizeInput';
 
 export class CreateFloorDto {
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }) => sanitize(value))
   name: string;
 
   @IsInt()

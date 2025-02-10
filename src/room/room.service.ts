@@ -63,7 +63,7 @@ export class RoomService {
       if (room) dataExists('Room');
 
       const newRoom = await this.prismaService.room.create({
-        data: { ...createRoomDto, creatorId: id },
+        data: { ...createRoomDto, creatorId: id, status: 'incomplete' },
       });
 
       await this.prismaService.log.create({
@@ -183,6 +183,23 @@ export class RoomService {
         where: { id: roomId },
         data: updateRoomDto,
       });
+
+      const updatedRoom = await this.prismaService.room.findFirst({
+        where: { id: roomId },
+        include: { images: true },
+      });
+
+      if (
+        updatedRoom.direction &&
+        room.detail &&
+        room.directionPattern &&
+        updatedRoom.images.length > 0
+      ) {
+        await this.prismaService.room.update({
+          where: { id: roomId },
+          data: { status: 'complete' },
+        });
+      }
 
       await this.prismaService.log.create({
         data: {
