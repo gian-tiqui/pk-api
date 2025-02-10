@@ -73,7 +73,7 @@ export class RoomController {
     return this.roomService.findRoomById(roomId, query);
   }
 
-  @Patch(':roomId/upload')
+  @Post(':roomId/upload')
   @UseInterceptors(
     FilesInterceptor('files', 20, {
       limits: { fileSize: 1024 * 1024 * 10 },

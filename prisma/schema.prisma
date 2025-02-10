@@ -76,7 +76,9 @@ model Room {
   images            RoomImages[]
   isDeleted         Boolean    @default(false)
   creatorId         Int
+  direction         String?
   directionPattern  Json?
+  status            String?
   creator           User       @relation(fields: [creatorId], references: [id])
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt

@@ -165,6 +165,7 @@ export class FloorService {
             detail: null,
             floorId,
             isDeleted,
+            direction: null,
           }
         : {
             ...(search && {
