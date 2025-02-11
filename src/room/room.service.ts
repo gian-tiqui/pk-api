@@ -218,6 +218,33 @@ export class RoomService {
     }
   }
 
+  async getRoomImagesByRoomId(roomId: number, query: FindAllDto) {
+    const { offset, limit, isDeleted } = query;
+
+    try {
+      const where: Prisma.RoomImagesWhereInput = {
+        ...(isDeleted && { isDeleted: true }),
+      };
+
+      const images = await this.prismaService.roomImages.findMany({
+        where,
+        skip: offset || PaginationDefault.OFFSET,
+        take: limit || PaginationDefault.LIMIT,
+        select: { imageLocation: true },
+      });
+
+      const count = await this.prismaService.roomImages.count();
+
+      return {
+        message: `Images of the room with the id ${roomId} loaded successfully.`,
+        images,
+        count,
+      };
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
+
   async uploadRoomPhotosById(
     roomId: number,
     files: Express.Multer.File[],
