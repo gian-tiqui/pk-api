@@ -66,11 +66,31 @@ export class RoomController {
   }
 
   @Get(':roomId')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before loading a room data',
+    keyPrefix: 'get-room-by-id',
+    points: 10,
+  })
   findOne(
     @Param('roomId', ParseIntPipe) roomId: number,
     @Query() query: FindAllDto,
   ) {
     return this.roomService.findRoomById(roomId, query);
+  }
+
+  @Get(':roomId/photos')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before loading the images of a room',
+    keyPrefix: 'get-room-images',
+    points: 10,
+  })
+  getRoomImages(
+    @Param('roomId', ParseIntPipe) roomId: number,
+    @Query() query: FindAllDto,
+  ) {
+    return this.roomService.getRoomImagesByRoomId(roomId, query);
   }
 
   @Post(':roomId/upload')
