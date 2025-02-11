@@ -230,7 +230,7 @@ export class RoomService {
         where,
         skip: offset || PaginationDefault.OFFSET,
         take: limit || PaginationDefault.LIMIT,
-        select: { imageLocation: true },
+        select: { id: true, imageLocation: true },
       });
 
       const count = await this.prismaService.roomImages.count();
