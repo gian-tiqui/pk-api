@@ -223,7 +223,7 @@ export class RoomService {
 
     try {
       const where: Prisma.RoomImagesWhereInput = {
-        ...(isDeleted && { isDeleted: true }),
+        ...(isDeleted ? { isDeleted: true } : { isDeleted: false }),
       };
 
       const images = await this.prismaService.roomImages.findMany({
