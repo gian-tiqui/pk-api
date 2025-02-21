@@ -18,7 +18,6 @@ import { ServerStatusModule } from './server-status/server-status.module';
     AuthModule,
     ConfigModule.forRoot({ isGlobal: true }),
     ServeStaticModule.forRoot({
-      // URL Structure: http://localhost:8083/uploads/room_images/2-1738052403796-328735966-download.jpg
       rootPath: join(__dirname, '..', '..', 'uploads'),
       serveRoot: '/uploads',
     }),

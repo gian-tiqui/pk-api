@@ -17,6 +17,7 @@ import { UpdateSecretQuestionDto } from './dto/update-secret-question.dto';
 import { FindAllDto } from 'src/utils/common/find-all.dto';
 import errorHandler from 'src/utils/functions/errorHandler';
 import extractAccessToken from 'src/utils/functions/extractAccessToken';
+import { RateLimit } from 'nestjs-rate-limiter';
 
 @Controller('secret-question')
 export class SecretQuestionController {
@@ -24,6 +25,12 @@ export class SecretQuestionController {
 
   constructor(private readonly secretQuestionService: SecretQuestionService) {}
 
+  @RateLimit({
+    keyPrefix: 'create-secret-question',
+    points: 10,
+    duration: 60,
+    errorMessage: 'Please wait before creating a secret question.',
+  })
   @Post()
   create(
     @Body() createSecretQuestionDto: CreateSecretQuestionDto,
@@ -41,16 +48,34 @@ export class SecretQuestionController {
     }
   }
 
+  @RateLimit({
+    keyPrefix: 'find-secret-questions',
+    points: 10,
+    duration: 60,
+    errorMessage: 'Please wait before loading secret questions.',
+  })
   @Get()
   findAll(@Query() query: FindAllDto) {
     return this.secretQuestionService.findSecretQuestions(query);
   }
 
+  @RateLimit({
+    keyPrefix: 'find-secret-question',
+    points: 10,
+    duration: 60,
+    errorMessage: 'Please wait before loading a secret question.',
+  })
   @Get(':secretQuestionId')
   findOne(@Param('secretQuestionId', ParseIntPipe) secretQuestionId: number) {
     return this.secretQuestionService.findSecretQuestionById(secretQuestionId);
   }
 
+  @RateLimit({
+    keyPrefix: 'update-secret-question',
+    points: 10,
+    duration: 60,
+    errorMessage: 'Please wait before updating a secret question.',
+  })
   @Patch(':secretQuestionId')
   update(
     @Param('secretQuestionId', ParseIntPipe) secretQuestionId: number,
@@ -71,6 +96,12 @@ export class SecretQuestionController {
   }
 
   @Delete(':secretQuestionId')
+  @RateLimit({
+    keyPrefix: 'remove-secret-question',
+    points: 10,
+    duration: 60,
+    errorMessage: 'Please wait before removing a secret question.',
+  })
   remove(
     @Param('secretQuestionId', ParseIntPipe) secretQuestionId: number,
     @Req() req: Request,
