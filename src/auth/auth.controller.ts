@@ -66,11 +66,23 @@ export class AuthController {
     return this.authService.logout(userId);
   }
 
+  @RateLimit({
+    keyPrefix: 'forgot-password',
+    points: 10,
+    duration: 60,
+    errorMessage: 'Please wait before pressing forgot password.',
+  })
   @Post('forgot-password')
   forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
     return this.authService.forgotPassword(forgotPasswordDto);
   }
 
+  @RateLimit({
+    keyPrefix: 'change-password',
+    points: 10,
+    duration: 60,
+    errorMessage: 'Please wait before changing password.',
+  })
   @Post('change-password')
   changePassword(@Body() changePasswordDto: ChangePasswordAuthDto) {
     return this.authService.changePassword(
