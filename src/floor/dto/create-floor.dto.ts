@@ -16,5 +16,7 @@ export class CreateFloorDto {
 
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }) => sanitize(value))
+  @Transform(({ value }) => sanitizeSQL(value))
   code: string;
 }

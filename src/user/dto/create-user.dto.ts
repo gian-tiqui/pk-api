@@ -28,6 +28,8 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }) => sanitize(value))
+  @Transform(({ value }) => sanitizeSQL(value))
   employeeId: string;
 
   @IsInt()

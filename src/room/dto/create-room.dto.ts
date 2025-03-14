@@ -12,6 +12,8 @@ export class CreateRoomDto {
 
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }) => sanitize(value))
+  @Transform(({ value }) => sanitizeSQL(value))
   code: string;
 
   @IsInt()

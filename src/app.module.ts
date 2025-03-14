@@ -13,14 +13,14 @@ import { ServerStatusModule } from './server-status/server-status.module';
 
 @Module({
   imports: [
-    FloorModule,
-    UserModule,
-    AuthModule,
-    ConfigModule.forRoot({ isGlobal: true }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', '..', 'uploads'),
       serveRoot: '/uploads',
     }),
+    ConfigModule.forRoot({ isGlobal: true }),
+    FloorModule,
+    UserModule,
+    AuthModule,
     RoomModule,
     DepartmentModule,
     SecretQuestionModule,
