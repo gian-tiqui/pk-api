@@ -79,6 +79,20 @@ export class RoomController {
     return this.roomService.findRoomById(roomId, query);
   }
 
+  @Get(':roomId/directionPatterns')
+  @RateLimit({
+    duration: 60,
+    errorMessage: 'Please wait before loading the direction patterns of a room',
+    keyPrefix: 'get-room-direction-patterns',
+    points: 10,
+  })
+  getRoomDirectionPatternsById(
+    @Param('roomId', ParseIntPipe) roomId,
+    @Query() query: FindAllDto,
+  ) {
+    return this.roomService.findRoomDirectionPatternById(roomId, query);
+  }
+
   @Get(':roomId/photos')
   @RateLimit({
     duration: 60,
@@ -144,7 +158,7 @@ export class RoomController {
     try {
       const accessToken = extractAccessToken(req);
 
-      return this.roomService.setRoomDirectionPattern(
+      return this.roomService.addDirectionPatternToRoomById(
         floorId,
         addDirectionDto,
         accessToken,

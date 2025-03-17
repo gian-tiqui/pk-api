@@ -87,4 +87,16 @@ export class FindAllDto {
     return value === 'true';
   })
   isIncomplete?: boolean;
+
+  @IsInt()
+  @IsOptional()
+  @Transform(({ value }) => {
+    const converted = parseInt(value, 10);
+
+    if (isNaN(converted))
+      throw new BadRequestException(`Starting point must be a numebr`);
+
+    return converted;
+  })
+  startingPoint: number;
 }

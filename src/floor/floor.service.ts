@@ -305,9 +305,8 @@ export class FloorService {
         },
       });
 
-      await this.prismaService.room.updateMany({
-        where: { floorId },
-        data: { directionPattern: null },
+      await this.prismaService.directionPattern.deleteMany({
+        where: { room: { floorId } },
       });
 
       return {
