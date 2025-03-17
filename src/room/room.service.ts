@@ -161,6 +161,37 @@ export class RoomService {
     }
   }
 
+  async findRoomDirectionPatternById(roomId: number, query: FindAllDto) {
+    try {
+      const room = await this.prismaService.room.findFirst({
+        where: { id: roomId },
+      });
+
+      if (!room) notFound('Room', roomId);
+
+      const { offset, limit, startingPoint } = query;
+
+      const where: Prisma.DirectionPatternWhereInput = { startingPoint };
+
+      const directionPatterns =
+        await this.prismaService.directionPattern.findMany({
+          where,
+          skip: offset || PaginationDefault.OFFSET,
+          take: limit || PaginationDefault.LIMIT,
+        });
+
+      const count = await this.prismaService.directionPattern.count({ where });
+
+      return {
+        message: `Direction Patterns of room with the id ${roomId} loaded successfully.`,
+        directionPatterns,
+        count,
+      };
+    } catch (error) {
+      errorHandler(error, this.logger);
+    }
+  }
+
   async updateRoomById(
     roomId: number,
     updateRoomDto: UpdateRoomDto,
