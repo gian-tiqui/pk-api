@@ -77,9 +77,19 @@ model Room {
   isDeleted         Boolean    @default(false)
   creatorId         Int
   direction         String?
-  directionPattern  Json?
+  directionPatterns DirectionPattern[]
   status            String?
   creator           User       @relation(fields: [creatorId], references: [id])
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+model DirectionPattern {
+  id                Int        @id @default(autoincrement())
+  startingPoint     Int
+  roomId            Int       
+  room              Room       @relation(fields: [roomId], references: [id])
+  directionPattern  Json
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 }

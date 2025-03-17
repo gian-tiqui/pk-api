@@ -144,7 +144,7 @@ export class RoomController {
     try {
       const accessToken = extractAccessToken(req);
 
-      return this.roomService.setRoomDirectionPattern(
+      return this.roomService.addDirectionPatternToRoomById(
         floorId,
         addDirectionDto,
         accessToken,

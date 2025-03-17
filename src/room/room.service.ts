@@ -173,6 +173,7 @@ export class RoomService {
         this.prismaService.user.findFirst({ where: { id: userId } }),
         this.prismaService.room.findFirst({
           where: { id: roomId },
+          include: { directionPatterns: true },
         }),
       ]);
 
@@ -192,7 +193,7 @@ export class RoomService {
       if (
         updatedRoom.direction &&
         room.detail &&
-        room.directionPattern &&
+        room.directionPatterns.length > 0 &&
         updatedRoom.images.length > 0
       ) {
         await this.prismaService.room.update({
@@ -313,7 +314,7 @@ export class RoomService {
     }
   }
 
-  async setRoomDirectionPattern(
+  async addDirectionPatternToRoomById(
     roomId: number,
     addDirectionDto: AddDirectionDto,
     accessToken: string,
@@ -323,27 +324,54 @@ export class RoomService {
 
       const [user, room] = await Promise.all([
         this.prismaService.user.findFirst({ where: { id } }),
-        this.prismaService.room.findFirst({ where: { id: roomId } }),
+        this.prismaService.room.findFirst({
+          where: { id: roomId },
+          include: { directionPatterns: true },
+        }),
       ]);
 
       if (!user) notFound(`User`, id);
       if (!room) notFound(`Room`, roomId);
 
-      await this.prismaService.room.update({
-        where: { id: roomId },
-        data: {
-          directionPattern: addDirectionDto.directions,
+      const found = await this.prismaService.directionPattern.findFirst({
+        where: {
+          AND: [{ roomId }, { startingPoint: addDirectionDto.startingPoint }],
         },
       });
 
-      await this.prismaService.log.create({
-        data: {
-          log: addDirectionDto.directions,
-          userId: id,
-          typeId: LogType.FLOOR,
-          methodId: LogMethod.UPDATE,
-        },
-      });
+      if (found) {
+        await this.prismaService.directionPattern.update({
+          where: { id: found.id },
+          data: {
+            directionPattern: addDirectionDto.directionPattern,
+          },
+        });
+
+        await this.prismaService.log.create({
+          data: {
+            log: getPreviousValues(found, { ...addDirectionDto }),
+            userId: id,
+            typeId: LogType.FLOOR,
+            methodId: LogMethod.UPDATE,
+          },
+        });
+      } else {
+        await this.prismaService.directionPattern.create({
+          data: {
+            roomId,
+            ...addDirectionDto,
+          },
+        });
+
+        await this.prismaService.log.create({
+          data: {
+            log: addDirectionDto.directionPattern,
+            userId: id,
+            typeId: LogType.FLOOR,
+            methodId: LogMethod.CREATE,
+          },
+        });
+      }
 
       return {
         message: `The room with the id ${roomId}'s directions added successfully.`,

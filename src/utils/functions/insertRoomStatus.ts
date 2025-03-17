@@ -1,11 +1,11 @@
-import { Room } from '@prisma/client';
+import { DirectionPattern, Room } from '@prisma/client';
 
 const insertRoomStatus = (rooms: Room[]): Room[] => {
   const roomsWithStatus: Room[] = [];
 
-  rooms.map((room) => {
+  rooms.map((room: Room & { directionPatterns: DirectionPattern[] }) => {
     const status =
-      room.detail || room.direction || room.directionPattern
+      room.detail || room.direction || room.directionPatterns.length > 0
         ? 'complete'
         : 'incomplete';
 

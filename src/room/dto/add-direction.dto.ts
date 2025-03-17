@@ -1,7 +1,11 @@
-import { IsNotEmpty, IsObject } from 'class-validator';
+import { IsInt, IsNotEmpty, IsObject } from 'class-validator';
 
 export class AddDirectionDto {
   @IsObject()
   @IsNotEmpty()
-  directions: object;
+  directionPattern: object;
+
+  @IsInt()
+  @IsNotEmpty()
+  startingPoint: number;
 }
