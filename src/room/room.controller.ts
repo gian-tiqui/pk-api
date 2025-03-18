@@ -28,13 +28,13 @@ import { RateLimit } from 'nestjs-rate-limiter';
 import { AddDirectionDto } from './dto/add-direction.dto';
 import { JwtAuthGuard } from 'src/auth/guards/auth.guard';
 
-@UseGuards(JwtAuthGuard)
 @Controller('room')
 export class RoomController {
   private logger: Logger = new Logger('RoomController');
 
   constructor(private readonly roomService: RoomService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   @RateLimit({
     duration: 60,
@@ -57,6 +57,7 @@ export class RoomController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   @RateLimit({
     duration: 60,
@@ -68,6 +69,7 @@ export class RoomController {
     return this.roomService.findRooms(query);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':roomId')
   @RateLimit({
     duration: 60,
@@ -110,6 +112,7 @@ export class RoomController {
     return this.roomService.getRoomImagesByRoomId(roomId, query);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post(':roomId/upload')
   @UseInterceptors(
     FilesInterceptor('files', 20, {
@@ -146,6 +149,7 @@ export class RoomController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post(':floorId/directions')
   @RateLimit({
     duration: 60,
@@ -171,6 +175,7 @@ export class RoomController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':roomId/delete-images')
   @RateLimit({
     duration: 60,
@@ -198,6 +203,7 @@ export class RoomController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':roomId')
   @RateLimit({
     duration: 60,
@@ -225,6 +231,7 @@ export class RoomController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':roomId/soft-delete')
   @RateLimit({
     duration: 60,
@@ -247,6 +254,7 @@ export class RoomController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':roomId')
   @RateLimit({
     duration: 60,
@@ -266,6 +274,7 @@ export class RoomController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':roomId/retrieve')
   @RateLimit({
     duration: 60,
