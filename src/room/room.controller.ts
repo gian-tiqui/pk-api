@@ -13,6 +13,7 @@ import {
   Logger,
   Query,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { UpdateRoomDto } from './dto/update-room.dto';
@@ -25,7 +26,9 @@ import { FindAllDto } from 'src/utils/common/find-all.dto';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { RateLimit } from 'nestjs-rate-limiter';
 import { AddDirectionDto } from './dto/add-direction.dto';
+import { JwtAuthGuard } from 'src/auth/guards/auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('room')
 export class RoomController {
   private logger: Logger = new Logger('RoomController');
