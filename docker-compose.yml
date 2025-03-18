@@ -11,7 +11,7 @@ services:
       - logs:/usr/src/app/logs
       - uploads:/usr/src/app/uploads
     ports:
-      - '8081:8081'
+      - '8083:8083'
 
 volumes:
   logs:
