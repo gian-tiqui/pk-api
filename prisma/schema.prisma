@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,130 +8,130 @@ datasource db {
 }
 
 model User {
-  id                Int        @id @default(autoincrement())
-  firstName         String
-  middleName        String?
-  lastName          String
-  isDeleted         Boolean    @default(false)
-  employeeId        String     @unique
-  password          String
-  deptId            Int        
-  department        Department @relation(fields: [deptId], references: [id])
-  refreshToken      String?    @unique
-  logs              Log[]
-  secretQuestionId  Int?
-  secretQuestion    SecretQuestion? @relation(fields: [secretQuestionId], references: [id])
-  secretAnswer      String?
-  floors            Floor[]
-  rooms             Room[]
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  id               Int             @id @default(autoincrement())
+  firstName        String
+  middleName       String?
+  lastName         String
+  isDeleted        Boolean         @default(false)
+  employeeId       String          @unique
+  password         String
+  deptId           Int
+  department       Department      @relation(fields: [deptId], references: [id])
+  refreshToken     String?         @unique
+  logs             Log[]
+  secretQuestionId Int?
+  secretQuestion   SecretQuestion? @relation(fields: [secretQuestionId], references: [id])
+  secretAnswer     String?
+  floors           Floor[]
+  rooms            Room[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 }
 
 model Department {
-  id               Int         @id @default(autoincrement())
-  name             String      @unique
-  code             String      @unique
-  users            User[]
-  divisionId       Int
-  division         Division    @relation(fields: [divisionId], references: [id])
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  code       String   @unique
+  users      User[]
+  divisionId Int
+  division   Division @relation(fields: [divisionId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Division {
-  id               Int         @id @default(autoincrement())
-  name             String      @unique
-  code             String      @unique
-  departments      Department[]
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  code        String       @unique
+  departments Department[]
 }
 
 model Floor {
-  id                Int        @id @default(autoincrement())
-  name              String     
-  level             Int        
-  code              String     
-  isDeleted         Boolean    @default(false)
-  rooms             Room[]
-  creatorId         Int
-  creator           User       @relation(fields: [creatorId], references: [id])
-  imageLocation     String?
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  id            Int      @id @default(autoincrement())
+  name          String
+  level         Int
+  code          String
+  isDeleted     Boolean  @default(false)
+  rooms         Room[]
+  creatorId     Int
+  creator       User     @relation(fields: [creatorId], references: [id])
+  imageLocation String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Room {
-  id                Int        @id @default(autoincrement())
+  id                Int                @id @default(autoincrement())
   name              String
-  code              String     
+  code              String
   detail            String?
   floorId           Int
-  floor             Floor      @relation(fields: [floorId], references: [id], onDelete: Cascade)
+  floor             Floor              @relation(fields: [floorId], references: [id], onDelete: Cascade)
   images            RoomImages[]
-  isDeleted         Boolean    @default(false)
+  isDeleted         Boolean            @default(false)
   creatorId         Int
   direction         String?
   directionPatterns DirectionPattern[]
   status            String?
-  creator           User       @relation(fields: [creatorId], references: [id])
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  creator           User               @relation(fields: [creatorId], references: [id])
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 }
 
 model DirectionPattern {
-  id                Int        @id @default(autoincrement())
-  startingPoint     Int
-  roomId            Int       
-  room              Room       @relation(fields: [roomId], references: [id])
-  directionPattern  Json
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  id               Int      @id @default(autoincrement())
+  startingPoint    Int
+  roomId           Int
+  room             Room     @relation(fields: [roomId], references: [id])
+  directionPattern Json
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model RoomImages {
-  id                Int        @id @default(autoincrement())
-  roomId            Int
-  room              Room       @relation(fields: [roomId], references: [id])
-  imageLocation     String     @unique
-  isMainImage       Boolean
-  isDeleted         Boolean    @default(false)
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  id            Int      @id @default(autoincrement())
+  roomId        Int
+  room          Room     @relation(fields: [roomId], references: [id])
+  imageLocation String   @unique
+  isMainImage   Boolean
+  isDeleted     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Log {
-  id                Int        @id @default(autoincrement())
-  userId            Int        
-  user              User       @relation(fields: [userId], references: [id])
-  log               Json
-  typeId            Int
-  type              LogType    @relation(fields: [typeId], references: [id])
-  methodId          Int
-  method            LogMethod  @relation(fields: [methodId], references: [id])
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  log       Json
+  typeId    Int
+  type      LogType   @relation(fields: [typeId], references: [id])
+  methodId  Int
+  method    LogMethod @relation(fields: [methodId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model LogMethod {
-  id                Int        @id @default(autoincrement())
-  method            String     @unique
-  logs              Log[]
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  id        Int      @id @default(autoincrement())
+  method    String   @unique
+  logs      Log[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model LogType {
-  id                Int        @id @default(autoincrement())
-  type              String     @unique
-  logs              Log[]
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  id        Int      @id @default(autoincrement())
+  type      String   @unique
+  logs      Log[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model SecretQuestion {
-  id                Int        @id @default(autoincrement())
-  question          String
-  user              User[]
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  id        Int      @id @default(autoincrement())
+  question  String
+  user      User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
