@@ -10,7 +10,6 @@ services:
     volumes:
       - logs:/usr/src/app/logs
       - uploads:/usr/src/app/uploads
-      - ./dist:/usr/src/app/dist # Add this line to map the dist directory
     ports:
       - '8083:8083'
 
