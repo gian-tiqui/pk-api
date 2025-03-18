@@ -9,6 +9,7 @@ import {
   Req,
   Logger,
   BadRequestException,
+  UseGuards,
   Query,
   ParseIntPipe,
   UseInterceptors,
@@ -18,6 +19,7 @@ import { FloorService } from './floor.service';
 import { CreateFloorDto } from './dto/create-floor.dto';
 import { UpdateFloorDto } from './dto/update-floor.dto';
 import errorHandler from 'src/utils/functions/errorHandler';
+import { JwtAuthGuard } from 'src/auth/guards/auth.guard';
 import { FindAllDto } from 'src/utils/common/find-all.dto';
 import extractAccessToken from 'src/utils/functions/extractAccessToken';
 import {
@@ -36,6 +38,7 @@ export class FloorController {
 
   constructor(private readonly floorService: FloorService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   @RateLimit({
     duration: 60,
@@ -108,6 +111,7 @@ export class FloorController {
     return this.floorService.findFloorRoomByIds(floorId, roomId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':floorId')
   @RateLimit({
     duration: 60,
@@ -135,6 +139,7 @@ export class FloorController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post(':floorId/upload')
   @RateLimit({
     duration: 60,
@@ -169,6 +174,7 @@ export class FloorController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':floorId/soft-delete')
   @RateLimit({
     duration: 60,
@@ -191,6 +197,7 @@ export class FloorController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':floorId')
   @RateLimit({
     duration: 60,
@@ -213,6 +220,7 @@ export class FloorController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':floorId/retrieve')
   @RateLimit({
     duration: 60,
