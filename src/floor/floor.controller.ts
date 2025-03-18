@@ -32,13 +32,13 @@ import {
 import { RateLimit } from 'nestjs-rate-limiter';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-@UseGuards(JwtAuthGuard)
 @Controller('floor')
 export class FloorController {
   private logger: Logger = new Logger('FloorController');
 
   constructor(private readonly floorService: FloorService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   @RateLimit({
     duration: 60,
@@ -111,6 +111,7 @@ export class FloorController {
     return this.floorService.findFloorRoomByIds(floorId, roomId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':floorId')
   @RateLimit({
     duration: 60,
@@ -138,6 +139,7 @@ export class FloorController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post(':floorId/upload')
   @RateLimit({
     duration: 60,
@@ -172,6 +174,7 @@ export class FloorController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':floorId/soft-delete')
   @RateLimit({
     duration: 60,
@@ -194,6 +197,7 @@ export class FloorController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':floorId')
   @RateLimit({
     duration: 60,
@@ -216,6 +220,7 @@ export class FloorController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':floorId/retrieve')
   @RateLimit({
     duration: 60,
