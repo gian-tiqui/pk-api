@@ -10,6 +10,7 @@ import {
   Logger,
   Req,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,7 +20,9 @@ import errorHandler from 'src/utils/functions/errorHandler';
 import extractAccessToken from 'src/utils/functions/extractAccessToken';
 import { RateLimit } from 'nestjs-rate-limiter';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { JwtAuthGuard } from 'src/auth/guards/auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('user')
 export class UserController {
   private logger: Logger = new Logger('UserController');

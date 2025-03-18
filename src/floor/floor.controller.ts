@@ -9,7 +9,7 @@ import {
   Req,
   Logger,
   BadRequestException,
-  // UseGuards,
+  UseGuards,
   Query,
   ParseIntPipe,
   UseInterceptors,
@@ -19,7 +19,7 @@ import { FloorService } from './floor.service';
 import { CreateFloorDto } from './dto/create-floor.dto';
 import { UpdateFloorDto } from './dto/update-floor.dto';
 import errorHandler from 'src/utils/functions/errorHandler';
-// import { JwtAuthGuard } from 'src/auth/guards/auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/auth.guard';
 import { FindAllDto } from 'src/utils/common/find-all.dto';
 import extractAccessToken from 'src/utils/functions/extractAccessToken';
 import {
@@ -32,7 +32,7 @@ import {
 import { RateLimit } from 'nestjs-rate-limiter';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('floor')
 export class FloorController {
   private logger: Logger = new Logger('FloorController');
