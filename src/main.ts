@@ -8,7 +8,7 @@ async function bootstrap() {
   const PORT = process.env.PORT;
 
   app.enableCors({
-    origin: ['http://localhost:5173'],
+    origin: ['http://localhost:5173', 'http://10.10.10.30:8080'],
     methods: ['GET', 'POST', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders:
       'Origin, Content-Type, Authorization, X-RequestedWith, Cache-Control',
