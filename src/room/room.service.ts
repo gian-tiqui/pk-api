@@ -171,7 +171,10 @@ export class RoomService {
 
       const { offset, limit, startingPoint } = query;
 
-      const where: Prisma.DirectionPatternWhereInput = { startingPoint };
+      const where: Prisma.DirectionPatternWhereInput = {
+        startingPoint,
+        roomId,
+      };
 
       const directionPatterns =
         await this.prismaService.directionPattern.findMany({
