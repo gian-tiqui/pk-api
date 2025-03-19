@@ -28,6 +28,7 @@ import {
 import convertDatesToString from 'src/utils/functions/convertDatesToString';
 import * as path from 'path';
 import generateUniqueSuffix from 'src/utils/functions/generateUniqueSuffix';
+import insertRoomStatus from 'src/utils/functions/insertRoomStatus';
 
 @Injectable()
 export class FloorService {
@@ -181,6 +182,7 @@ export class FloorService {
 
       const rooms = await this.prismaService.room.findMany({
         where,
+        include: { directionPatterns: true },
         orderBy,
         skip: offset || PaginationDefault.OFFSET,
         take: limit || PaginationDefault.LIMIT,
@@ -193,7 +195,7 @@ export class FloorService {
       return {
         message: `Rooms of the floor with the id ${floorId} found.`,
         count,
-        rooms,
+        rooms: insertRoomStatus(rooms),
       };
     } catch (error) {
       errorHandler(error, this.logger);

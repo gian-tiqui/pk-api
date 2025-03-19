@@ -5,7 +5,10 @@ const insertRoomStatus = (rooms: Room[]): Room[] => {
 
   rooms.map((room: Room & { directionPatterns: DirectionPattern[] }) => {
     const status =
-      room.detail || room.direction || room.directionPatterns.length > 0
+      room.detail &&
+      room.direction &&
+      room.directionPatterns &&
+      room.directionPatterns.length > 0
         ? 'complete'
         : 'incomplete';
 
