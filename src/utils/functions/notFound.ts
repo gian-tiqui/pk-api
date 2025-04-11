@@ -2,9 +2,9 @@ import { NotFoundException } from '@nestjs/common';
 
 const notFound = (
   entity: string,
-  id: number,
+  id: number | string,
   entity2?: string,
-  id2?: number,
+  id2?: number | string,
 ) => {
   if (entity2)
     throw new NotFoundException(

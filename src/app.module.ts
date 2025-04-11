@@ -10,6 +10,8 @@ import { join } from 'path';
 import { DepartmentModule } from './department/department.module';
 import { SecretQuestionModule } from './secret-question/secret-question.module';
 import { ServerStatusModule } from './server-status/server-status.module';
+import { ItemModule } from './item/item.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { ServerStatusModule } from './server-status/server-status.module';
     DepartmentModule,
     SecretQuestionModule,
     ServerStatusModule,
+    ItemModule,
+    TransactionModule,
   ],
   providers: [PrismaService],
 })
