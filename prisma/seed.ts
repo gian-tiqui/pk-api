@@ -248,6 +248,60 @@ const seedDepartments = async () => {
   console.log('Department seeded.');
 };
 
+const seedSpecializations = async () => {
+  const specializations = [
+    'Cardiology',
+    'Dermatology',
+    'Pediatrics',
+    'Neurology',
+    'Orthopedics',
+    'General Surgery',
+    'Psychiatry',
+    'Internal Medicine',
+    'ENT (Otolaryngology)',
+    'Ophthalmology',
+  ];
+
+  for (const description of specializations) {
+    await prismaClient.specialization.upsert({
+      where: { description },
+      update: {},
+      create: { description },
+    });
+  }
+
+  console.log('Specializations seeded.');
+};
+
+const seedDoctors = async () => {
+  const specializations = await prismaClient.specialization.findMany();
+
+  const getRandomSpecializationId = () =>
+    specializations[Math.floor(Math.random() * specializations.length)].id;
+
+  const doctors = [
+    { firstName: 'John', middleName: 'A.', lastName: 'Doe' },
+    { firstName: 'Maria', middleName: 'B.', lastName: 'Santos' },
+    { firstName: 'Ahmed', middleName: 'C.', lastName: 'Khan' },
+    { firstName: 'Emily', middleName: 'D.', lastName: 'Smith' },
+    { firstName: 'Carlos', middleName: 'E.', lastName: 'Reyes' },
+    { firstName: 'Grace', middleName: 'F.', lastName: 'Lee' },
+    { firstName: 'Miguel', middleName: 'G.', lastName: 'Torres' },
+    { firstName: 'Anna', middleName: 'H.', lastName: 'Martinez' },
+  ];
+
+  for (const doctor of doctors) {
+    await prismaClient.doctor.create({
+      data: {
+        ...doctor,
+        specializationId: getRandomSpecializationId(),
+      },
+    });
+  }
+
+  console.log('Doctors seeded.');
+};
+
 const seedQuestions = async () => {
   const questions: string[] = [
     'What was the name of your first pet?',
@@ -320,6 +374,8 @@ const main = async () => {
   await seedUsers();
   await seedQuestions();
   await seedItems();
+  await seedSpecializations();
+  await seedDoctors();
 };
 
 main().catch((err) => console.error(err));
