@@ -191,6 +191,16 @@ model Specialization {
 
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
+  parentId          Int
+  parentSpecialization Specialization @relation("SubSpecialization", fields: [parentId], references: [id])
 
+  subSpecializations Specialization[] @relation("SubSpecialization")
   doctors           Doctor[]
+}
+
+model Appointment {
+  id                Int          @id @default(autoincrement())
+
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 }
