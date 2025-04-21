@@ -12,6 +12,7 @@ import { SecretQuestionModule } from './secret-question/secret-question.module';
 import { ServerStatusModule } from './server-status/server-status.module';
 import { ItemModule } from './item/item.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { DoctorModule } from './doctor/doctor.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { TransactionModule } from './transaction/transaction.module';
     ServerStatusModule,
     ItemModule,
     TransactionModule,
+    DoctorModule,
   ],
   providers: [PrismaService],
 })
