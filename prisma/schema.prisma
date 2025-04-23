@@ -179,8 +179,8 @@ model Doctor {
   middleName        String
   lastName          String
 
-  specializationId  Int
-  specialization    Specialization @relation(fields: [specializationId], references: [id])
+  specializationId  Int?
+  specialization    Specialization? @relation(fields: [specializationId], references: [id])
 
   selectedItems     SelectedItem[]
 }
