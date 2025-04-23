@@ -266,7 +266,7 @@ const seedSpecializations = async () => {
     await prismaClient.specialization.upsert({
       where: { description },
       update: {},
-      create: { description },
+      create: { description, parentId: 0 },
     });
   }
 
